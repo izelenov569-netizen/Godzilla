@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Прогрузы на спорт — Godzilla Bets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="container">
+        <h1 class="brand">Godzilla Bets</h1>
+        <p class="subtitle">
+          Лента актуальных прогрузов на популярные спортивные события.
+        </p>
+        <nav class="filters" aria-label="Фильтры по видам спорта">
+          <button class="filter-button is-active" data-filter="all">Все</button>
+          <button class="filter-button" data-filter="football">Футбол</button>
+          <button class="filter-button" data-filter="basketball">Баскетбол</button>
+          <button class="filter-button" data-filter="tennis">Теннис</button>
+          <button class="filter-button" data-filter="hockey">Хоккей</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="highlights" aria-live="polite">
+        <h2>Свежие прогрузы</h2>
+        <div id="loading-state" class="cards" role="status" aria-label="Загрузка событий">
+          <!-- Skeleton cards will be injected here -->
+        </div>
+        <div id="events-grid" class="cards" hidden></div>
+      </section>
+
+      <aside class="stats-panel" aria-live="polite">
+        <h2>Статистика по рынкам</h2>
+        <div id="stats" class="stats-grid"></div>
+      </aside>
+    </main>
+
+    <template id="event-card-template">
+      <article class="event-card" tabindex="0">
+        <header class="event-header">
+          <span class="league"></span>
+          <span class="sport-tag"></span>
+        </header>
+        <h3 class="teams"></h3>
+        <p class="start-time"></p>
+        <dl class="market">
+          <div>
+            <dt>Ставка</dt>
+            <dd class="market-bet"></dd>
+          </div>
+          <div>
+            <dt>Коэффициент</dt>
+            <dd class="market-odds"></dd>
+          </div>
+          <div>
+            <dt>Прогруз</dt>
+            <dd class="market-volume"></dd>
+          </div>
+        </dl>
+      </article>
+    </template>
+
+    <template id="skeleton-card-template">
+      <article class="event-card skeleton">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line long"></div>
+        <div class="skeleton-line medium"></div>
+      </article>
+    </template>
+
+    <template id="stat-card-template">
+      <article class="stat-card">
+        <h3 class="stat-title"></h3>
+        <p class="stat-value"></p>
+        <p class="stat-change"></p>
+      </article>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
