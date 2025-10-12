@@ -34,6 +34,26 @@ body {
   transition: background 0.4s ease, color 0.4s ease;
 }
 
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #05060f;
+  font-weight: 600;
+  text-decoration: none;
+  z-index: 999;
+  transition: transform 0.3s ease;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px -24px var(--accent);
+}
+
 main {
   max-width: 1200px;
   margin: 0 auto;
@@ -101,6 +121,10 @@ main {
   color: var(--text-muted);
   font-size: 1.05rem;
   margin-bottom: 2rem;
+}
+
+.hero__stats {
+  row-gap: 1rem;
 }
 
 .hero__stats {
@@ -595,6 +619,46 @@ main {
   font-size: 0.92rem;
 }
 
+.market-card__ev {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(151, 162, 196, 0.18);
+}
+
+[data-theme="light"] .market-card__ev {
+  background: rgba(17, 21, 36, 0.03);
+}
+
+.market-card__ev-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.market-card__ev-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.market-card__ev-value--positive {
+  color: var(--accent);
+}
+
+.market-card__ev-value--negative {
+  color: #ff7a8a;
+}
+
+.market-card__ev-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
 .impact {
   padding: 0.35rem 0.9rem;
   border-radius: 999px;
@@ -658,6 +722,164 @@ main {
   border-radius: 6px;
   background: linear-gradient(180deg, rgba(51, 240, 148, 0.75), rgba(51, 240, 148, 0));
   min-height: 18px;
+}
+
+.optimizer {
+  margin: 4rem 0 0;
+  padding: 3rem;
+  background: var(--bg-alt);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 2.5rem;
+}
+
+.optimizer__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.optimizer__grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.optimizer-card {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 1.8rem;
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 1.2rem;
+}
+
+.optimizer-card h3 {
+  font-size: 1.1rem;
+}
+
+.optimizer-card__hint {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.value-table-wrapper {
+  overflow-x: auto;
+}
+
+.value-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.value-table th,
+.value-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(151, 162, 196, 0.18);
+}
+
+.value-table th {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.value-table tr:last-child td {
+  border-bottom: none;
+}
+
+.value-table__title {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.value-table__title strong {
+  font-weight: 600;
+}
+
+.value-table__meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.value-table__empty {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.value-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(51, 240, 148, 0.16);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.value-chip--negative {
+  background: rgba(255, 122, 138, 0.18);
+  color: #ff7a8a;
+}
+
+.bankroll-form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.bankroll-form__field {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.bankroll-form__field span {
+  color: var(--text-muted);
+}
+
+.bankroll-form input,
+.bankroll-form select {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(5, 7, 18, 0.5);
+  color: var(--text);
+  padding: 0.8rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+[data-theme="light"] .bankroll-form input,
+[data-theme="light"] .bankroll-form select {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.bankroll-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.bankroll-result {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.bankroll-result strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.bankroll-result__meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .trendline span {
