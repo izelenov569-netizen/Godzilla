@@ -141,51 +141,6 @@ const forecasts = [
   { market: "Махачев — победа", delta: "-0.08", confidence: 92 }
 ];
 
-const parlayIdeas = [
-  {
-    id: "combo-1",
-    title: "Вечерний фаворит",
-    risk: "Сбалансированный",
-    confidence: 82,
-    totalOdds: 3.84,
-    edge: "+7% EV",
-    legs: [
-      { match: marketsData[0].match, pick: marketsData[0].marketLabel, sport: marketsData[0].sport },
-      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport }
-    ],
-    comment: "Сочетание топовых линий из футбола и тенниса для вечернего прайм-тайма."
-  },
-  {
-    id: "combo-2",
-    title: "Ночная очередь",
-    risk: "Агрессивный",
-    confidence: 76,
-    totalOdds: 4.62,
-    edge: "+11% EV",
-    legs: [
-      { match: marketsData[1].match, pick: marketsData[1].marketLabel, sport: marketsData[1].sport },
-      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport },
-      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport }
-    ],
-    comment: "Риски выше нормы, зато покрываем NBA, NHL и киберспорт в одной связке."
-  },
-  {
-    id: "combo-3",
-    title: "Выходной экспресс",
-    risk: "Консервативный",
-    confidence: 88,
-    totalOdds: 2.91,
-    edge: "+5% EV",
-    legs: [
-      { match: marketsData[6].match, pick: marketsData[6].marketLabel, sport: marketsData[6].sport },
-      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport }
-    ],
-    comment: "Подборка с упором на стабильные чемпионаты и умеренную волатильность."
-  }
-];
-
-const comboFeedbackTimers = new Map();
-
 let liveFeedEvents = [
   createFeedEvent({
     minutesAgo: 4,
@@ -229,13 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("toggle-theme").textContent =
     state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
 
-  renderHeroStats();
-  renderQuickFilters();
   renderFilters();
   renderMarkets();
   renderAnalytics();
-  renderInsights();
-  renderCombos();
   renderLiveFeed();
   markUpdated();
   scheduleAutoRefresh();
@@ -308,10 +259,6 @@ function renderMarkets() {
       <div class="market-card__meta">
         Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
       </div>
-      <div class="market-card__trend" aria-hidden="true">
-        <span class="market-card__trend-label">Динамика прогруза</span>
-        ${renderTrendline(item.movement)}
-      </div>
     `;
     grid.append(card);
   });
@@ -321,7 +268,6 @@ function renderMarkets() {
   }
 
   renderSignals(filteredMarkets);
-  updateQuickFiltersActiveState();
 }
 
 function renderAnalytics() {
@@ -478,9 +424,6 @@ function refreshLiveData(source = "auto") {
   renderAnalytics();
   renderLiveFeed();
   markUpdated();
-  renderHeroStats();
-  renderInsights();
-  renderCombos();
 }
 
 function scheduleAutoRefresh() {
@@ -510,37 +453,6 @@ function attachEventListeners() {
   document.getElementById("sport-filter").addEventListener("change", renderMarkets);
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
-
-  const quickFilters = document.getElementById("quick-filters");
-  if (quickFilters) {
-    quickFilters.addEventListener("click", event => {
-      const button = event.target.closest(".quick-filter");
-      if (!button) return;
-      const { value } = button.dataset;
-      const sportSelect = document.getElementById("sport-filter");
-      if (sportSelect && sportSelect.value !== value) {
-        sportSelect.value = value;
-        renderMarkets();
-      }
-      updateQuickFiltersActiveState();
-    });
-  }
-
-  const comboGrid = document.getElementById("combo-grid");
-  if (comboGrid) {
-    comboGrid.addEventListener("click", event => {
-      const card = event.target.closest(".combo-card");
-      if (!card) return;
-      handleComboCopy(card);
-    });
-    comboGrid.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      const card = event.target.closest(".combo-card");
-      if (!card) return;
-      event.preventDefault();
-      handleComboCopy(card);
-    });
-  }
 
   document.getElementById("manual-refresh").addEventListener("click", () => {
     refreshLiveData("manual");
@@ -579,20 +491,6 @@ function normalizeSparkline(values) {
     return values.map(() => 60);
   }
   return values.map(value => 30 + ((value - min) / (max - min)) * 70);
-}
-
-function renderTrendline(values = []) {
-  if (!values.length) {
-    return `<div class="trendline"><span style="height: 50%"></span><span style="height: 50%"></span><span style="height: 50%"></span><span style="height: 50%"></span></div>`;
-  }
-  const normalized = normalizeSparkline(values);
-  return `
-    <div class="trendline">
-      ${normalized
-        .map(point => `<span style="height: ${Math.max(35, Math.min(point, 95))}%"></span>`)
-        .join("")}
-    </div>
-  `;
 }
 
 function clearAdditionalOptions(select) {
@@ -649,237 +547,4 @@ function createFeedEvent({ minutesAgo, type, context, title, description }) {
     title,
     description
   };
-}
-
-function renderHeroStats() {
-  const container = document.getElementById("hero-stats");
-  if (!container) return;
-
-  const totalMarkets = marketsData.length;
-  if (!totalMarkets) {
-    container.innerHTML = "";
-    return;
-  }
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
-  );
-  const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
-
-  const stats = [
-    { label: "Прогнозов в ленте", value: totalMarkets },
-    { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
-  ];
-
-  container.innerHTML = stats
-    .map(
-      stat => `
-        <div class="hero-stat">
-          <span class="hero-stat__value">${stat.value}</span>
-          <span class="hero-stat__label">${stat.label}</span>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function renderQuickFilters() {
-  const container = document.getElementById("quick-filters");
-  if (!container) return;
-
-  const sports = ["all", ...new Set(marketsData.map(item => item.sport))];
-  container.innerHTML = "";
-
-  sports.forEach(sport => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "quick-filter";
-    button.dataset.value = sport;
-    button.textContent = sport === "all" ? "Все виды" : sport;
-    container.append(button);
-  });
-
-  updateQuickFiltersActiveState();
-}
-
-function updateQuickFiltersActiveState() {
-  const container = document.getElementById("quick-filters");
-  const sportSelect = document.getElementById("sport-filter");
-  if (!container || !sportSelect) return;
-  const currentValue = sportSelect.value;
-  container.querySelectorAll(".quick-filter").forEach(button => {
-    button.classList.toggle("quick-filter--active", button.dataset.value === currentValue);
-  });
-}
-
-function renderInsights() {
-  const grid = document.getElementById("insights-grid");
-  const meta = document.getElementById("insights-meta");
-  if (!grid) return;
-
-  if (!marketsData.length) {
-    grid.innerHTML = `<div class="empty-state">Инсайтов пока нет — ждём новые данные</div>`;
-    if (meta) {
-      meta.textContent = "Нет активных событий";
-    }
-    return;
-  }
-
-  const busiestMarket = marketsData.reduce((acc, item) => (item.loadPercent > acc.loadPercent ? item : acc), marketsData[0]);
-  const sharpestMove = marketsData
-    .map(item => ({ ...item, delta: Math.abs(item.oddsCurrent - item.oddsStart) }))
-    .sort((a, b) => b.delta - a.delta)[0];
-  const heaviestVolume = marketsData.reduce((acc, item) => (item.loadValue > acc.loadValue ? item : acc), marketsData[0]);
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / marketsData.length
-  );
-
-  const cards = [
-    {
-      title: "Максимальный прогруз",
-      value: `${busiestMarket.loadPercent}%`,
-      caption: `${busiestMarket.match}`,
-      detail: `${busiestMarket.tournament} · ${busiestMarket.sport}`
-    },
-    {
-      title: "Резкое движение линии",
-      value: `${sharpestMove.delta.toFixed(2)}`,
-      caption: `${sharpestMove.oddsStart.toFixed(2)} → ${sharpestMove.oddsCurrent.toFixed(2)}`,
-      detail: `${sharpestMove.match}`
-    },
-    {
-      title: "Пул объёма 24ч",
-      value: `${formatCurrency(heaviestVolume.loadValue)}`,
-      caption: `${heaviestVolume.match}`,
-      detail: `${heaviestVolume.tournament}`
-    }
-  ];
-
-  grid.innerHTML = cards
-    .map(
-      card => `
-        <article class="insight-card">
-          <h3>${card.title}</h3>
-          <div class="insight-card__value">${card.value}</div>
-          <div class="insight-card__meta">${card.caption}</div>
-          <div class="insight-card__meta insight-card__meta--muted">${card.detail}</div>
-        </article>
-      `
-    )
-    .join("");
-
-  if (meta) {
-    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · ${new Date().toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
-  }
-}
-
-function renderCombos() {
-  const grid = document.getElementById("combo-grid");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  parlayIdeas.forEach(combo => {
-    const card = document.createElement("article");
-    card.className = "combo-card";
-    card.dataset.comboId = combo.id;
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
-    card.setAttribute(
-      "aria-label",
-      `Скопировать экспресс «${combo.title}» с итоговым коэффициентом ${combo.totalOdds.toFixed(2)}`
-    );
-    card.innerHTML = `
-      <header class="combo-card__header">
-        <div>
-          <h3>${combo.title}</h3>
-          <div class="combo-card__meta">${combo.risk} риск · уверенность ${combo.confidence}%</div>
-        </div>
-        <span class="combo-card__edge ${combo.edge.startsWith("+") ? "combo-card__edge--positive" : ""}">${combo.edge}</span>
-      </header>
-      <ul class="combo-card__legs">
-        ${combo.legs
-          .map(
-            leg => `
-              <li>
-                <strong>${leg.match}</strong>
-                <span>${leg.pick}</span>
-                <span class="combo-card__tag">${leg.sport}</span>
-              </li>
-            `
-          )
-          .join("")}
-      </ul>
-      <p class="combo-card__comment">${combo.comment}</p>
-      <footer class="combo-card__footer">
-        <span class="combo-card__odds">Итоговый коэфф. ${combo.totalOdds.toFixed(2)}</span>
-        <span class="combo-card__hint" data-default="Нажмите, чтобы скопировать" data-success="Экспресс скопирован!">Нажмите, чтобы скопировать</span>
-      </footer>
-    `;
-    grid.append(card);
-  });
-}
-
-function handleComboCopy(card) {
-  const comboId = card.dataset.comboId;
-  const combo = parlayIdeas.find(item => item.id === comboId);
-  if (!combo) return;
-
-  const text = [
-    `Экспресс «${combo.title}» (${combo.edge})`,
-    ...combo.legs.map((leg, index) => `${index + 1}. ${leg.match} — ${leg.pick}`),
-    `Итоговый коэффициент: ${combo.totalOdds.toFixed(2)}`
-  ].join("\n");
-
-  const hint = card.querySelector(".combo-card__hint");
-
-  const finalize = () => {
-    if (!hint) return;
-    hint.textContent = hint.dataset.success || "Скопировано";
-    card.classList.add("combo-card--copied");
-    if (comboFeedbackTimers.has(comboId)) {
-      clearTimeout(comboFeedbackTimers.get(comboId));
-    }
-    comboFeedbackTimers.set(
-      comboId,
-      setTimeout(() => {
-        card.classList.remove("combo-card--copied");
-        hint.textContent = hint.dataset.default || "Нажмите, чтобы скопировать";
-      }, 2200)
-    );
-  };
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(finalize).catch(() => {
-      copyTextFallback(text);
-      finalize();
-    });
-  } else {
-    copyTextFallback(text);
-    finalize();
-  }
-}
-
-function copyTextFallback(text) {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "true");
-  textarea.style.position = "absolute";
-  textarea.style.left = "-9999px";
-  document.body.append(textarea);
-  textarea.select();
-  try {
-    document.execCommand("copy");
-  } catch (error) {
-    console.error("Не удалось скопировать экспресс", error);
-  }
-  textarea.remove();
 }
