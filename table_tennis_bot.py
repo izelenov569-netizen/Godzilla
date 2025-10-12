@@ -190,7 +190,9 @@ class CupManager:
                 player1=player1,
                 player2=player2,
             )
-            if player2 is None:
+            if player1 is None and player2 is None:
+                match.score = "BYE"
+            elif player2 is None:
                 match.winner = player1
                 match.score = "BYE"
             round_matches.append(match.to_dict())
@@ -262,12 +264,15 @@ class CupManager:
     def _update_next_round(self, completed_match: Dict) -> None:
         round_no = completed_match["round"]
         matches = self.rounds[round_no - 1]
-        all_finished = all(m.get("winner") for m in matches)
+        all_finished = all(self._is_match_finished(m) for m in matches)
         if not all_finished:
             self.save()
             return
 
-        winners = [m.get("winner") for m in matches]
+        winners = [
+            None if self._is_double_bye(m) else m.get("winner")
+            for m in matches
+        ]
         if len(winners) == 1:
             self.cup["status"] = "finished"
             self.save()
@@ -290,10 +295,21 @@ class CupManager:
                 player1=player1,
                 player2=player2,
             )
+            if player1 is None and player2 is None:
+                match.score = "BYE"
+            elif player2 is None:
+                match.winner = player1
+                match.score = "BYE"
             next_round_matches.append(match.to_dict())
 
         self.cup["current_round"] = round_no + 1
         self.save()
+
+    def _is_double_bye(self, match: Dict) -> bool:
+        return match.get("player1") is None and match.get("player2") is None
+
+    def _is_match_finished(self, match: Dict) -> bool:
+        return bool(match.get("winner")) or self._is_double_bye(match)
 
 
 manager = CupManager()
