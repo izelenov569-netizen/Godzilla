@@ -1,155 +1,154 @@
 const marketsData = [
   {
     id: 1,
-    sport: "Футбол",
-    tournament: "Серия А",
-    stage: "Тур 27",
-    match: "Интер — Аталанта",
+    sport: "PS5",
+    tournament: "FUT Champions Finals",
+    stage: "Раунд 5",
+    match: "Mkers_Dani — Fnatic_Tekkz",
     market: "match_winner",
-    marketLabel: "Победа Интера",
-    loadPercent: 74,
-    oddsStart: 1.88,
-    oddsCurrent: 1.72,
-    loadValue: 186000,
+    marketLabel: "Победа Fnatic_Tekkz",
+    loadPercent: 72,
+    oddsStart: 2.05,
+    oddsCurrent: 1.78,
+    loadValue: 245000,
     impact: "Высокий",
-    time: "14:20 MSK",
-    movement: [55, 63, 70, 74]
+    time: "21:45 MSK",
+    movement: [51, 58, 66, 72]
   },
   {
     id: 2,
-    sport: "Баскетбол",
-    tournament: "NBA",
-    stage: "Регулярный сезон",
-    match: "Boston Celtics — Miami Heat",
-    market: "total_points",
-    marketLabel: "Тотал больше 221.5",
-    loadPercent: 68,
-    oddsStart: 1.95,
-    oddsCurrent: 1.82,
-    loadValue: 152000,
+    sport: "Xbox",
+    tournament: "Global Series Qualifier",
+    stage: "1/8 финала",
+    match: "RBLZ_Henry — Hashtag Tom",
+    market: "total_goals",
+    marketLabel: "Тотал больше 3.5",
+    loadPercent: 64,
+    oddsStart: 2.12,
+    oddsCurrent: 1.95,
+    loadValue: 183000,
     impact: "Средний",
-    time: "03:05 MSK",
-    movement: [48, 58, 64, 68]
+    time: "19:10 MSK",
+    movement: [43, 52, 58, 64]
   },
   {
     id: 3,
-    sport: "Теннис",
-    tournament: "Ролан Гаррос",
-    stage: "1/4 финала",
-    match: "Ига Свёнтек — Аріна Соболенко",
-    market: "match_winner",
-    marketLabel: "Победа Иги Свёнтек",
-    loadPercent: 81,
-    oddsStart: 1.62,
-    oddsCurrent: 1.48,
-    loadValue: 97000,
-    impact: "Экстремальный",
-    time: "18:40 MSK",
-    movement: [60, 68, 76, 81]
+    sport: "PS5",
+    tournament: "EA SPORTS Cup",
+    stage: "Групповой этап",
+    match: "FUTWIZ Marko — Ajax Lev",
+    market: "handicap",
+    marketLabel: "Фора (-1.5) FUTWIZ Marko",
+    loadPercent: 59,
+    oddsStart: 1.98,
+    oddsCurrent: 1.82,
+    loadValue: 162000,
+    impact: "Средний",
+    time: "16:30 MSK",
+    movement: [40, 47, 53, 59]
   },
   {
     id: 4,
-    sport: "Хоккей",
-    tournament: "КХЛ",
-    stage: "Плей-офф",
-    match: "СКА — Локомотив",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) СКА",
-    loadPercent: 57,
-    oddsStart: 2.05,
-    oddsCurrent: 1.92,
-    loadValue: 83000,
-    impact: "Средний",
-    time: "19:30 MSK",
-    movement: [42, 49, 54, 57]
+    sport: "PC",
+    tournament: "Weekend League Elite",
+    stage: "Топ-32",
+    match: "Virtus Pro Andrey — G2 Neat",
+    market: "both_score",
+    marketLabel: "Обе забьют",
+    loadPercent: 68,
+    oddsStart: 1.74,
+    oddsCurrent: 1.61,
+    loadValue: 142000,
+    impact: "Высокий",
+    time: "00:25 MSK",
+    movement: [49, 55, 61, 68]
   },
   {
     id: 5,
-    sport: "Футбол",
-    tournament: "АПЛ",
-    stage: "Тур 31",
-    match: "Ливерпуль — Манчестер Сити",
-    market: "both_score",
-    marketLabel: "Обе забьют",
-    loadPercent: 66,
-    oddsStart: 1.71,
-    oddsCurrent: 1.62,
-    loadValue: 175000,
-    impact: "Высокий",
-    time: "22:15 MSK",
-    movement: [52, 58, 62, 66]
+    sport: "PS5",
+    tournament: "Ultimate Team Cups",
+    stage: "Полуфинал",
+    match: "SPQR Crazy — Tricked Facito",
+    market: "total_goals",
+    marketLabel: "Тотал меньше 4.5",
+    loadPercent: 53,
+    oddsStart: 1.87,
+    oddsCurrent: 1.74,
+    loadValue: 98000,
+    impact: "Низкий",
+    time: "13:40 MSK",
+    movement: [37, 44, 49, 53]
   },
   {
     id: 6,
-    sport: "Киберспорт",
-    tournament: "Dota 2 Major",
-    stage: "Групповой этап",
-    match: "Team Spirit — PSG.LGD",
+    sport: "Xbox",
+    tournament: "FIFAe Nations",
+    stage: "Раунд 2",
+    match: "France eLes Bleus — Germany eNational",
     market: "match_winner",
-    marketLabel: "Победа Team Spirit",
-    loadPercent: 71,
-    oddsStart: 2.12,
-    oddsCurrent: 1.96,
-    loadValue: 64000,
-    impact: "Высокий",
-    time: "11:00 MSK",
-    movement: [51, 59, 66, 71]
+    marketLabel: "Победа France eLes Bleus",
+    loadPercent: 76,
+    oddsStart: 1.92,
+    oddsCurrent: 1.68,
+    loadValue: 273000,
+    impact: "Экстремальный",
+    time: "18:05 MSK",
+    movement: [58, 63, 70, 76]
   },
   {
     id: 7,
-    sport: "Волейбол",
-    tournament: "Лига чемпионов",
-    stage: "Полуфинал",
-    match: "Зенит — Перуджа",
-    market: "total_points",
-    marketLabel: "Тотал меньше 183.5",
-    loadPercent: 54,
-    oddsStart: 1.98,
-    oddsCurrent: 1.88,
-    loadValue: 42000,
-    impact: "Низкий",
-    time: "17:10 MSK",
-    movement: [40, 46, 51, 54]
+    sport: "PS5",
+    tournament: "FUT Champions Finals",
+    stage: "Раунд 7",
+    match: "Aleksey Parshikov — K1llerZlatan",
+    market: "handicap",
+    marketLabel: "Фора (+1.5) Parshikov",
+    loadPercent: 61,
+    oddsStart: 2.22,
+    oddsCurrent: 2.04,
+    loadValue: 117000,
+    impact: "Средний",
+    time: "23:20 MSK",
+    movement: [42, 51, 56, 61]
   },
   {
     id: 8,
-    sport: "Теннис",
-    tournament: "ATP Майами",
+    sport: "PC",
+    tournament: "Champions Play-In",
     stage: "Финал",
-    match: "Янник Синнер — Карлос Алькарас",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) Синнер",
-    loadPercent: 63,
-    oddsStart: 1.92,
-    oddsCurrent: 1.79,
-    loadValue: 88000,
-    impact: "Средний",
-    time: "01:30 MSK",
-    movement: [47, 55, 59, 63]
+    match: "Team Liquid Levy — Sampi Emerick",
+    market: "match_winner",
+    marketLabel: "Победа Team Liquid Levy",
+    loadPercent: 69,
+    oddsStart: 1.88,
+    oddsCurrent: 1.71,
+    loadValue: 205000,
+    impact: "Высокий",
+    time: "20:15 MSK",
+    movement: [50, 57, 63, 69]
   }
 ];
 
 const stableTournaments = [
-  { name: "Серия А (футбол)", stability: "+7.2% ROI", matches: 38 },
-  { name: "NBA (баскетбол)", stability: "+5.6% ROI", matches: 42 },
-  { name: "КХЛ (хоккей)", stability: "+4.1% ROI", matches: 35 }
+  { name: "FUT Champions (PS5)", stability: "+8.4% ROI", matches: 52 },
+  { name: "EA SPORTS Cup (Xbox)", stability: "+6.9% ROI", matches: 38 },
+  { name: "FIFAe Nations (онлайн)", stability: "+5.1% ROI", matches: 41 }
 ];
 
 const forecasts = [
-  { market: "Интер — победа", delta: "-0.07", confidence: 84 },
-  { market: "NBA тотал 221.5", delta: "-0.05", confidence: 71 },
-  { market: "СКА фора -1.5", delta: "-0.03", confidence: 64 }
+  { market: "Fnatic_Tekkz — победа", delta: "-0.09", confidence: 88 },
+  { market: "RBLZ_Henry vs Tom тотал 3.5", delta: "-0.06", confidence: 73 },
+  { market: "France eLes Bleus — победа", delta: "-0.11", confidence: 91 }
 ];
 
 const state = {
-  theme: localStorage.getItem("tt-theme") || "light"
+  theme: localStorage.getItem("tt-theme") || "dark"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (state.theme === "dark") {
-    document.documentElement.setAttribute("data-theme", "dark");
-    document.getElementById("toggle-theme").textContent = "Светлая тема";
-  }
+  document.documentElement.setAttribute("data-theme", state.theme);
+  document.getElementById("toggle-theme").textContent =
+    state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
 
   renderFilters();
   renderMarkets();
@@ -227,7 +226,7 @@ function renderMarkets() {
     });
 
   if (!grid.children.length) {
-    grid.innerHTML = `<div class="empty-state">Нет прогрузов по выбранным фильтрам</div>`;
+    grid.innerHTML = `<div class="empty-state">Нет прогнозов по выбранным фильтрам</div>`;
   }
 }
 
