@@ -1,95 +1,125 @@
 const marketsData = [
   {
     id: 1,
-    tournament: "WTT Contender Doha",
-    stage: "1/8 финала",
-    match: "Линь Юнжу — Патрик Франциска",
+    sport: "football",
+    tournament: "Лига чемпионов",
+    stage: "Четвертьфинал",
+    match: "Реал Мадрид — Манчестер Сити",
     market: "match_winner",
-    marketLabel: "Победа Линь Юнжу",
-    loadPercent: 78,
-    oddsStart: 1.74,
-    oddsCurrent: 1.58,
-    loadValue: 126000,
+    marketLabel: "Победа Реал Мадрид",
+    loadPercent: 76,
+    oddsStart: 2.15,
+    oddsCurrent: 1.95,
+    loadValue: 182000,
     impact: "Высокий",
-    time: "14:20 MSK",
-    movement: [68, 70, 74, 78]
+    time: "21:45 MSK",
+    movement: [48, 55, 63, 76]
   },
   {
     id: 2,
-    tournament: "Чемпионат России",
-    stage: "Женщины, полуфинал",
-    match: "Полина Михайлова — Юлия Привалова",
+    sport: "hockey",
+    tournament: "КХЛ Плей-офф",
+    stage: "Финал конференции",
+    match: "Ак Барс — СКА",
     market: "total_points",
-    marketLabel: "Тотал больше 75.5",
+    marketLabel: "Тотал больше 4.5",
     loadPercent: 64,
-    oddsStart: 1.92,
-    oddsCurrent: 1.80,
-    loadValue: 58000,
+    oddsStart: 1.98,
+    oddsCurrent: 1.82,
+    loadValue: 124000,
     impact: "Средний",
-    time: "16:05 MSK",
-    movement: [50, 56, 61, 64]
+    time: "19:30 MSK",
+    movement: [44, 51, 58, 64]
   },
   {
     id: 3,
-    tournament: "Bundesliga",
-    stage: "Мужчины",
-    match: "Боруссия Дюссельдорф — Фюрт",
+    sport: "basketball",
+    tournament: "Евролига",
+    stage: "Регулярный сезон",
+    match: "Барселона — Олимпиакос",
     market: "handicap",
-    marketLabel: "Фора (-2.5) Боруссия",
-    loadPercent: 82,
-    oddsStart: 1.85,
-    oddsCurrent: 1.66,
-    loadValue: 91000,
+    marketLabel: "Фора (-5.5) Барселона",
+    loadPercent: 81,
+    oddsStart: 1.92,
+    oddsCurrent: 1.68,
+    loadValue: 98000,
     impact: "Экстремальный",
-    time: "19:30 MSK",
-    movement: [60, 70, 78, 82]
+    time: "22:05 MSK",
+    movement: [60, 66, 74, 81]
   },
   {
     id: 4,
-    tournament: "TT Cup",
-    stage: "Групповой этап",
-    match: "Мирослав Урбана — Ян Ковач",
+    sport: "tennis",
+    tournament: "ATP Монте-Карло",
+    stage: "1/4 финала",
+    match: "Андрей Рублёв — Янник Синнер",
     market: "match_winner",
-    marketLabel: "Победа Ян Ковач",
-    loadPercent: 55,
-    oddsStart: 2.25,
-    oddsCurrent: 2.05,
-    loadValue: 32000,
+    marketLabel: "Победа Янник Синнер",
+    loadPercent: 58,
+    oddsStart: 1.88,
+    oddsCurrent: 1.74,
+    loadValue: 72000,
     impact: "Средний",
-    time: "12:45 MSK",
-    movement: [45, 50, 53, 55]
+    time: "17:10 MSK",
+    movement: [42, 49, 54, 58]
   },
   {
     id: 5,
-    tournament: "TT Star Series",
-    stage: "Квалификация",
-    match: "Анна Жаворонкова — Ванъ Юй",
+    sport: "esports",
+    tournament: "CS2 Major",
+    stage: "Полуфинал",
+    match: "Natus Vincere — Vitality",
     market: "total_points",
-    marketLabel: "Тотал меньше 73.5",
+    marketLabel: "Тотал карт больше 2.5",
     loadPercent: 69,
-    oddsStart: 1.99,
-    oddsCurrent: 1.83,
-    loadValue: 47000,
+    oddsStart: 2.12,
+    oddsCurrent: 1.94,
+    loadValue: 56000,
     impact: "Высокий",
-    time: "21:10 MSK",
-    movement: [54, 58, 65, 69]
+    time: "15:00 MSK",
+    movement: [48, 55, 62, 69]
+  },
+  {
+    id: 6,
+    sport: "volleyball",
+    tournament: "Суперлига",
+    stage: "Женщины, финал",
+    match: "Динамо Москва — Локомотив",
+    market: "handicap",
+    marketLabel: "Фора (+1.5) Локомотив",
+    loadPercent: 62,
+    oddsStart: 2.05,
+    oddsCurrent: 1.86,
+    loadValue: 48000,
+    impact: "Высокий",
+    time: "18:20 MSK",
+    movement: [40, 52, 58, 62]
   }
 ];
 
-const officials = [
-  { name: "Михаил Сорокин", stability: "+8.6% ROI", matches: 24 },
-  { name: "Андреа Морети", stability: "+5.1% ROI", matches: 18 },
-  { name: "Лю Мин", stability: "+4.7% ROI", matches: 21 }
+const topLeagues = [
+  { name: "КХЛ Плей-офф", stability: "+6.8% ROI", matches: 36 },
+  { name: "Евролига", stability: "+5.4% ROI", matches: 28 },
+  { name: "Ла Лига", stability: "+4.1% ROI", matches: 42 }
 ];
 
 const forecasts = [
-  { market: "Победа Линь Юнжу", delta: "-0.08", confidence: 82 },
-  { market: "Тотал больше 75.5", delta: "-0.04", confidence: 68 },
-  { market: "Фора (-2.5) Боруссия", delta: "-0.11", confidence: 74 }
+  { market: "Победа Реал Мадрид", delta: "-0.12", confidence: 84 },
+  { market: "Тотал больше 4.5", delta: "-0.05", confidence: 71 },
+  { market: "Фора (-5.5) Барселона", delta: "-0.09", confidence: 77 }
 ];
 
 const state = {
-  theme: localStorage.getItem("tt-theme") || "light"
+  theme: localStorage.getItem("sportloads-theme") || "light"
+};
+
+const SPORT_LABELS = {
+  football: "Футбол",
+  hockey: "Хоккей",
+  basketball: "Баскетбол",
+  tennis: "Теннис",
+  esports: "Киберспорт",
+  volleyball: "Волейбол"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -105,28 +135,64 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function renderFilters() {
+  const sportSelect = document.getElementById("sport-filter");
+  sportSelect.innerHTML = "";
+
+  const sports = ["all", ...new Set(marketsData.map(item => item.sport))];
+  sports.forEach(sport => {
+    const option = document.createElement("option");
+    option.value = sport;
+    option.textContent = sport === "all" ? "Все" : formatSportLabel(sport);
+    sportSelect.append(option);
+  });
+
+  populateTournaments("all");
+}
+
+function populateTournaments(sportFilter) {
   const tournamentSelect = document.getElementById("tournament-filter");
-  const tournaments = ["all", ...new Set(marketsData.map(item => item.tournament))];
+  const previousValue = tournamentSelect.value;
+
+  tournamentSelect.innerHTML = "";
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "all";
+  defaultOption.textContent = "Все";
+  tournamentSelect.append(defaultOption);
+
+  const tournaments = [
+    ...new Set(
+      marketsData
+        .filter(item => sportFilter === "all" || item.sport === sportFilter)
+        .map(item => item.tournament)
+    )
+  ];
 
   tournaments.forEach(tournament => {
-    if (tournament === "all") return;
     const option = document.createElement("option");
     option.value = tournament;
     option.textContent = tournament;
     tournamentSelect.append(option);
   });
+
+  if (tournaments.includes(previousValue)) {
+    tournamentSelect.value = previousValue;
+  } else {
+    tournamentSelect.value = "all";
+  }
 }
 
 function renderMarkets() {
   const grid = document.getElementById("markets-grid");
+  const sportFilter = document.getElementById("sport-filter").value;
   const tournamentFilter = document.getElementById("tournament-filter").value;
   const marketFilter = document.getElementById("market-filter").value;
 
   grid.innerHTML = "";
 
   marketsData
-    .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
-    .filter(item => (marketFilter === "all" || item.market === marketFilter))
+    .filter(item => sportFilter === "all" || item.sport === sportFilter)
+    .filter(item => tournamentFilter === "all" || item.tournament === tournamentFilter)
+    .filter(item => marketFilter === "all" || item.market === marketFilter)
     .forEach(item => {
       const card = document.createElement("article");
       card.className = "market-card";
@@ -135,7 +201,7 @@ function renderMarkets() {
         <div class="market-card__header">
           <div>
             <h3>${item.match}</h3>
-            <div class="market-card__meta">${item.tournament} · ${item.stage}</div>
+            <div class="market-card__meta">${formatSportLabel(item.sport)} · ${item.tournament} · ${item.stage}</div>
           </div>
           <span class="impact">${item.impact}</span>
         </div>
@@ -176,12 +242,12 @@ function renderAnalytics() {
     sparkline.append(bar);
   });
 
-  const officialsList = document.getElementById("top-officials");
-  officialsList.innerHTML = "";
-  officials.forEach(official => {
+  const leaguesList = document.getElementById("top-leagues");
+  leaguesList.innerHTML = "";
+  topLeagues.forEach(league => {
     const li = document.createElement("li");
-    li.innerHTML = `<span>${official.name}</span><span>${official.stability} · ${official.matches} матчей</span>`;
-    officialsList.append(li);
+    li.innerHTML = `<span>${league.name}</span><span>${league.stability} · ${league.matches} матчей</span>`;
+    leaguesList.append(li);
   });
 
   const forecastList = document.getElementById("forecast");
@@ -194,6 +260,11 @@ function renderAnalytics() {
 }
 
 function attachEventListeners() {
+  document.getElementById("sport-filter").addEventListener("change", event => {
+    populateTournaments(event.target.value);
+    renderMarkets();
+  });
+
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
 
@@ -201,7 +272,7 @@ function attachEventListeners() {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
     document.getElementById("toggle-theme").textContent = isDark ? "Тёмная тема" : "Светлая тема";
-    localStorage.setItem("tt-theme", isDark ? "light" : "dark");
+    localStorage.setItem("sportloads-theme", isDark ? "light" : "dark");
   });
 
   document.getElementById("faq-accordion").addEventListener("click", event => {
@@ -230,4 +301,8 @@ function normalizeSparkline(values) {
     return values.map(() => 60);
   }
   return values.map(value => 30 + ((value - min) / (max - min)) * 70);
+}
+
+function formatSportLabel(value) {
+  return SPORT_LABELS[value] || value;
 }

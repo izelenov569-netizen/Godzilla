@@ -149,67 +149,70 @@ main {
   align-items: center;
 }
 
-.pulse-circle {
-  position: absolute;
+.radar {
+  position: relative;
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background: var(--accent-soft);
-  animation: pulse 4s infinite;
+  background: radial-gradient(circle at center, rgba(31, 122, 236, 0.18), transparent 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-.table-tennis {
-  position: relative;
-  width: 220px;
-  height: 160px;
-}
-
-.bat {
+.radar__ring {
   position: absolute;
-  width: 60px;
-  height: 90px;
-  background: linear-gradient(140deg, #f04e4e, #f78181);
-  border-radius: 50px 50px 60px 60px;
-  transform-origin: bottom center;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.bat::after {
-  content: "";
-  position: absolute;
-  bottom: -25px;
-  left: 50%;
-  width: 16px;
-  height: 40px;
-  background: #cfcfd8;
-  border-radius: 12px;
-  transform: translateX(-50%);
-}
-
-.bat--left {
-  left: 0;
-  bottom: 0;
-  animation: swing-left 3.6s infinite;
-}
-
-.bat--right {
-  right: 0;
-  top: 10px;
-  animation: swing-right 3.6s infinite;
-  background: linear-gradient(140deg, #43b0f1, #82d6ff);
-}
-
-.ball {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  background: #fff5db;
+  border: 1px solid var(--accent-soft);
   border-radius: 50%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: inset -6px -6px 12px rgba(214, 147, 12, 0.2);
-  animation: rally 3.6s infinite;
+  inset: 20px;
+}
+
+.radar__ring--outer {
+  inset: 0;
+}
+
+.radar__ring--middle {
+  inset: 32px;
+}
+
+.radar__ring--inner {
+  inset: 64px;
+}
+
+.radar__sweep {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, rgba(76, 141, 255, 0.35), transparent 60%);
+  transform-origin: center;
+  animation: sweep 6s linear infinite;
+}
+
+.radar__icon {
+  position: absolute;
+  font-size: 2rem;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.2));
+}
+
+.radar__icon--football {
+  top: 24%;
+  left: 22%;
+}
+
+.radar__icon--hockey {
+  top: 60%;
+  right: 18%;
+}
+
+.radar__icon--basketball {
+  bottom: 18%;
+  left: 30%;
+}
+
+.radar__icon--tennis {
+  top: 44%;
+  right: 42%;
 }
 
 .section-header {
@@ -376,7 +379,7 @@ main {
   border-radius: 6px 6px 0 0;
 }
 
-.top-officials,
+.top-leagues,
 .forecast {
   margin-top: 1.2rem;
   display: grid;
@@ -384,7 +387,7 @@ main {
   list-style: none;
 }
 
-.top-officials li,
+.top-leagues li,
 .forecast li {
   display: flex;
   justify-content: space-between;
@@ -481,49 +484,11 @@ main {
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.7;
+@keyframes sweep {
+  from {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-@keyframes rally {
-  0% {
-    transform: translate(-50%, -50%);
-  }
-  25% {
-    transform: translate(-120%, -120%);
-  }
-  50% {
-    transform: translate(40%, -150%);
-  }
-  75% {
-    transform: translate(110%, 10%);
-  }
-  100% {
-    transform: translate(-50%, -50%);
-  }
-}
-
-@keyframes swing-left {
-  0%, 100% {
-    transform: rotate(-20deg);
-  }
-  50% {
-    transform: rotate(8deg);
-  }
-}
-
-@keyframes swing-right {
-  0%, 100% {
-    transform: rotate(20deg);
-  }
-  50% {
-    transform: rotate(-6deg);
+  to {
+    transform: rotate(360deg);
   }
 }
