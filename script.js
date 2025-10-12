@@ -1,144 +1,91 @@
 const marketsData = [
   {
     id: 1,
-    sport: "Футбол",
-    tournament: "Серия А",
-    stage: "Тур 27",
-    match: "Интер — Аталанта",
+    tournament: "WTT Contender Doha",
+    stage: "1/8 финала",
+    match: "Линь Юнжу — Патрик Франциска",
     market: "match_winner",
-    marketLabel: "Победа Интера",
-    loadPercent: 74,
-    oddsStart: 1.88,
-    oddsCurrent: 1.72,
-    loadValue: 186000,
+    marketLabel: "Победа Линь Юнжу",
+    loadPercent: 78,
+    oddsStart: 1.74,
+    oddsCurrent: 1.58,
+    loadValue: 126000,
     impact: "Высокий",
     time: "14:20 MSK",
-    movement: [55, 63, 70, 74]
+    movement: [68, 70, 74, 78]
   },
   {
     id: 2,
-    sport: "Баскетбол",
-    tournament: "NBA",
-    stage: "Регулярный сезон",
-    match: "Boston Celtics — Miami Heat",
+    tournament: "Чемпионат России",
+    stage: "Женщины, полуфинал",
+    match: "Полина Михайлова — Юлия Привалова",
     market: "total_points",
-    marketLabel: "Тотал больше 221.5",
-    loadPercent: 68,
-    oddsStart: 1.95,
-    oddsCurrent: 1.82,
-    loadValue: 152000,
+    marketLabel: "Тотал больше 75.5",
+    loadPercent: 64,
+    oddsStart: 1.92,
+    oddsCurrent: 1.80,
+    loadValue: 58000,
     impact: "Средний",
-    time: "03:05 MSK",
-    movement: [48, 58, 64, 68]
+    time: "16:05 MSK",
+    movement: [50, 56, 61, 64]
   },
   {
     id: 3,
-    sport: "Теннис",
-    tournament: "Ролан Гаррос",
-    stage: "1/4 финала",
-    match: "Ига Свёнтек — Аріна Соболенко",
-    market: "match_winner",
-    marketLabel: "Победа Иги Свёнтек",
-    loadPercent: 81,
-    oddsStart: 1.62,
-    oddsCurrent: 1.48,
-    loadValue: 97000,
+    tournament: "Bundesliga",
+    stage: "Мужчины",
+    match: "Боруссия Дюссельдорф — Фюрт",
+    market: "handicap",
+    marketLabel: "Фора (-2.5) Боруссия",
+    loadPercent: 82,
+    oddsStart: 1.85,
+    oddsCurrent: 1.66,
+    loadValue: 91000,
     impact: "Экстремальный",
-    time: "18:40 MSK",
-    movement: [60, 68, 76, 81]
+    time: "19:30 MSK",
+    movement: [60, 70, 78, 82]
   },
   {
     id: 4,
-    sport: "Хоккей",
-    tournament: "КХЛ",
-    stage: "Плей-офф",
-    match: "СКА — Локомотив",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) СКА",
-    loadPercent: 57,
-    oddsStart: 2.05,
-    oddsCurrent: 1.92,
-    loadValue: 83000,
+    tournament: "TT Cup",
+    stage: "Групповой этап",
+    match: "Мирослав Урбана — Ян Ковач",
+    market: "match_winner",
+    marketLabel: "Победа Ян Ковач",
+    loadPercent: 55,
+    oddsStart: 2.25,
+    oddsCurrent: 2.05,
+    loadValue: 32000,
     impact: "Средний",
-    time: "19:30 MSK",
-    movement: [42, 49, 54, 57]
+    time: "12:45 MSK",
+    movement: [45, 50, 53, 55]
   },
   {
     id: 5,
-    sport: "Футбол",
-    tournament: "АПЛ",
-    stage: "Тур 31",
-    match: "Ливерпуль — Манчестер Сити",
-    market: "both_score",
-    marketLabel: "Обе забьют",
-    loadPercent: 66,
-    oddsStart: 1.71,
-    oddsCurrent: 1.62,
-    loadValue: 175000,
-    impact: "Высокий",
-    time: "22:15 MSK",
-    movement: [52, 58, 62, 66]
-  },
-  {
-    id: 6,
-    sport: "Киберспорт",
-    tournament: "Dota 2 Major",
-    stage: "Групповой этап",
-    match: "Team Spirit — PSG.LGD",
-    market: "match_winner",
-    marketLabel: "Победа Team Spirit",
-    loadPercent: 71,
-    oddsStart: 2.12,
-    oddsCurrent: 1.96,
-    loadValue: 64000,
-    impact: "Высокий",
-    time: "11:00 MSK",
-    movement: [51, 59, 66, 71]
-  },
-  {
-    id: 7,
-    sport: "Волейбол",
-    tournament: "Лига чемпионов",
-    stage: "Полуфинал",
-    match: "Зенит — Перуджа",
+    tournament: "TT Star Series",
+    stage: "Квалификация",
+    match: "Анна Жаворонкова — Ванъ Юй",
     market: "total_points",
-    marketLabel: "Тотал меньше 183.5",
-    loadPercent: 54,
-    oddsStart: 1.98,
-    oddsCurrent: 1.88,
-    loadValue: 42000,
-    impact: "Низкий",
-    time: "17:10 MSK",
-    movement: [40, 46, 51, 54]
-  },
-  {
-    id: 8,
-    sport: "Теннис",
-    tournament: "ATP Майами",
-    stage: "Финал",
-    match: "Янник Синнер — Карлос Алькарас",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) Синнер",
-    loadPercent: 63,
-    oddsStart: 1.92,
-    oddsCurrent: 1.79,
-    loadValue: 88000,
-    impact: "Средний",
-    time: "01:30 MSK",
-    movement: [47, 55, 59, 63]
+    marketLabel: "Тотал меньше 73.5",
+    loadPercent: 69,
+    oddsStart: 1.99,
+    oddsCurrent: 1.83,
+    loadValue: 47000,
+    impact: "Высокий",
+    time: "21:10 MSK",
+    movement: [54, 58, 65, 69]
   }
 ];
 
-const stableTournaments = [
-  { name: "Серия А (футбол)", stability: "+7.2% ROI", matches: 38 },
-  { name: "NBA (баскетбол)", stability: "+5.6% ROI", matches: 42 },
-  { name: "КХЛ (хоккей)", stability: "+4.1% ROI", matches: 35 }
+const officials = [
+  { name: "Михаил Сорокин", stability: "+8.6% ROI", matches: 24 },
+  { name: "Андреа Морети", stability: "+5.1% ROI", matches: 18 },
+  { name: "Лю Мин", stability: "+4.7% ROI", matches: 21 }
 ];
 
 const forecasts = [
-  { market: "Интер — победа", delta: "-0.07", confidence: 84 },
-  { market: "NBA тотал 221.5", delta: "-0.05", confidence: 71 },
-  { market: "СКА фора -1.5", delta: "-0.03", confidence: 64 }
+  { market: "Победа Линь Юнжу", delta: "-0.08", confidence: 82 },
+  { market: "Тотал больше 75.5", delta: "-0.04", confidence: 68 },
+  { market: "Фора (-2.5) Боруссия", delta: "-0.11", confidence: 74 }
 ];
 
 const state = {
@@ -158,21 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function renderFilters() {
-  const sportSelect = document.getElementById("sport-filter");
   const tournamentSelect = document.getElementById("tournament-filter");
-  const sports = ["all", ...new Set(marketsData.map(item => item.sport))];
   const tournaments = ["all", ...new Set(marketsData.map(item => item.tournament))];
-
-  clearAdditionalOptions(sportSelect);
-  clearAdditionalOptions(tournamentSelect);
-
-  sports.forEach(sport => {
-    if (sport === "all") return;
-    const option = document.createElement("option");
-    option.value = sport;
-    option.textContent = sport;
-    sportSelect.append(option);
-  });
 
   tournaments.forEach(tournament => {
     if (tournament === "all") return;
@@ -185,14 +119,12 @@ function renderFilters() {
 
 function renderMarkets() {
   const grid = document.getElementById("markets-grid");
-  const sportFilter = document.getElementById("sport-filter").value;
   const tournamentFilter = document.getElementById("tournament-filter").value;
   const marketFilter = document.getElementById("market-filter").value;
 
   grid.innerHTML = "";
 
   marketsData
-    .filter(item => (sportFilter === "all" || item.sport === sportFilter))
     .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
     .filter(item => (marketFilter === "all" || item.market === marketFilter))
     .forEach(item => {
@@ -203,7 +135,7 @@ function renderMarkets() {
         <div class="market-card__header">
           <div>
             <h3>${item.match}</h3>
-            <div class="market-card__meta">${item.sport} · ${item.tournament} · ${item.stage}</div>
+            <div class="market-card__meta">${item.tournament} · ${item.stage}</div>
           </div>
           <span class="impact">${item.impact}</span>
         </div>
@@ -244,12 +176,12 @@ function renderAnalytics() {
     sparkline.append(bar);
   });
 
-  const tournamentsList = document.getElementById("top-officials");
-  tournamentsList.innerHTML = "";
-  stableTournaments.forEach(tournament => {
+  const officialsList = document.getElementById("top-officials");
+  officialsList.innerHTML = "";
+  officials.forEach(official => {
     const li = document.createElement("li");
-    li.innerHTML = `<span>${tournament.name}</span><span>${tournament.stability} · ${tournament.matches} матчей</span>`;
-    tournamentsList.append(li);
+    li.innerHTML = `<span>${official.name}</span><span>${official.stability} · ${official.matches} матчей</span>`;
+    officialsList.append(li);
   });
 
   const forecastList = document.getElementById("forecast");
@@ -262,7 +194,6 @@ function renderAnalytics() {
 }
 
 function attachEventListeners() {
-  document.getElementById("sport-filter").addEventListener("change", renderMarkets);
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
 
@@ -299,12 +230,4 @@ function normalizeSparkline(values) {
     return values.map(() => 60);
   }
   return values.map(value => 30 + ((value - min) / (max - min)) * 70);
-}
-
-function clearAdditionalOptions(select) {
-  Array.from(select.querySelectorAll("option")).forEach(option => {
-    if (option.value !== "all") {
-      option.remove();
-    }
-  });
 }
