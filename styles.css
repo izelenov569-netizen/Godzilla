@@ -149,67 +149,114 @@ main {
   align-items: center;
 }
 
-.pulse-circle {
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  animation: pulse 4s infinite;
-}
-
-.table-tennis {
+.hero__radar {
   position: relative;
-  width: 220px;
-  height: 160px;
-}
-
-.bat {
-  position: absolute;
-  width: 60px;
-  height: 90px;
-  background: linear-gradient(140deg, #f04e4e, #f78181);
-  border-radius: 50px 50px 60px 60px;
-  transform-origin: bottom center;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.bat::after {
-  content: "";
-  position: absolute;
-  bottom: -25px;
-  left: 50%;
-  width: 16px;
-  height: 40px;
-  background: #cfcfd8;
-  border-radius: 12px;
-  transform: translateX(-50%);
-}
-
-.bat--left {
-  left: 0;
-  bottom: 0;
-  animation: swing-left 3.6s infinite;
-}
-
-.bat--right {
-  right: 0;
-  top: 10px;
-  animation: swing-right 3.6s infinite;
-  background: linear-gradient(140deg, #43b0f1, #82d6ff);
-}
-
-.ball {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  background: #fff5db;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
-  left: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(76, 141, 255, 0.35), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(87, 197, 182, 0.35), transparent 65%),
+    var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 50px -28px rgba(31, 122, 236, 0.45);
+  overflow: hidden;
+}
+
+.hero__radar-ring {
+  position: absolute;
   top: 50%;
+  left: 50%;
+  width: 110px;
+  height: 110px;
+  border: 1px dashed rgba(31, 122, 236, 0.4);
+  border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: inset -6px -6px 12px rgba(214, 147, 12, 0.2);
-  animation: rally 3.6s infinite;
+  animation: rotate 12s linear infinite;
+}
+
+.hero__radar-ring--middle {
+  width: 170px;
+  height: 170px;
+  animation-duration: 16s;
+}
+
+.hero__radar-ring--outer {
+  width: 230px;
+  height: 230px;
+  animation-duration: 20s;
+}
+
+.hero__pulse {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-alt);
+  color: var(--accent);
+  font-size: 1.6rem;
+  box-shadow: 0 18px 40px -24px rgba(31, 122, 236, 0.65);
+  animation: pulse 4.5s ease-in-out infinite;
+}
+
+.hero__pulse--football {
+  top: 18%;
+  left: 18%;
+  animation-delay: 0.4s;
+}
+
+.hero__pulse--basketball {
+  bottom: 22%;
+  left: 12%;
+  animation-delay: 1s;
+}
+
+.hero__pulse--tennis {
+  top: 24%;
+  right: 16%;
+  animation-delay: 1.6s;
+}
+
+.hero__pulse--hockey {
+  bottom: 20%;
+  right: 12%;
+  animation-delay: 2.1s;
+}
+
+.hero__ticker {
+  position: absolute;
+  right: -40px;
+  bottom: -35px;
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 20px;
+  background: rgba(23, 26, 39, 0.9);
+  color: #f5f7ff;
+  font-size: 0.85rem;
+  box-shadow: 0 16px 38px -24px rgba(10, 16, 28, 0.85);
+}
+
+.ticker__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.ticker__row span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
 }
 
 .section-header {
@@ -471,6 +518,16 @@ main {
     padding: 2.5rem 1.8rem;
   }
 
+  .hero__illustration {
+    margin-top: 1.5rem;
+  }
+
+  .hero__ticker {
+    position: static;
+    margin-top: 1.5rem;
+    background: rgba(23, 26, 39, 0.95);
+  }
+
   .filters {
     width: 100%;
     justify-content: space-between;
@@ -483,8 +540,8 @@ main {
 
 @keyframes pulse {
   0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.7;
+    transform: scale(0.88);
+    opacity: 0.65;
   }
   50% {
     transform: scale(1.05);
@@ -492,38 +549,11 @@ main {
   }
 }
 
-@keyframes rally {
-  0% {
-    transform: translate(-50%, -50%);
+@keyframes rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
   }
-  25% {
-    transform: translate(-120%, -120%);
-  }
-  50% {
-    transform: translate(40%, -150%);
-  }
-  75% {
-    transform: translate(110%, 10%);
-  }
-  100% {
-    transform: translate(-50%, -50%);
-  }
-}
-
-@keyframes swing-left {
-  0%, 100% {
-    transform: rotate(-20deg);
-  }
-  50% {
-    transform: rotate(8deg);
-  }
-}
-
-@keyframes swing-right {
-  0%, 100% {
-    transform: rotate(20deg);
-  }
-  50% {
-    transform: rotate(-6deg);
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
