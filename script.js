@@ -141,8 +141,42 @@ const forecasts = [
   { market: "France eLes Bleus — победа", delta: "-0.11", confidence: 91 }
 ];
 
+let liveFeedEvents = [
+  createFeedEvent({
+    minutesAgo: 4,
+    type: "alert",
+    context: `${marketsData[0].tournament} · ${marketsData[0].sport}`,
+    title: marketsData[0].match,
+    description: `Резкий прогруз на ${marketsData[0].marketLabel.toLowerCase()} — коэффициент опустился до ${marketsData[0].oddsCurrent.toFixed(2)} при ${marketsData[0].loadPercent}% объёма.`
+  }),
+  createFeedEvent({
+    minutesAgo: 9,
+    type: "trend",
+    context: `${marketsData[1].tournament} · ${marketsData[1].sport}`,
+    title: marketsData[1].match,
+    description: `Ставки на ${marketsData[1].marketLabel.toLowerCase()} увеличились: вероятность пробития выросла, коэффициент теперь ${marketsData[1].oddsCurrent.toFixed(2)}.`
+  }),
+  createFeedEvent({
+    minutesAgo: 12,
+    type: "live",
+    context: `${marketsData[5].tournament} · ${marketsData[5].sport}`,
+    title: marketsData[5].match,
+    description: `Команда France eLes Bleus лидирует в голосовании капперов, ${marketsData[5].loadPercent}% ставок за победу и объём ${formatCurrency(marketsData[5].loadValue)}.`
+  }),
+  createFeedEvent({
+    minutesAgo: 15,
+    type: "trend",
+    context: `${marketsData[7].tournament} · ${marketsData[7].sport}`,
+    title: marketsData[7].match,
+    description: `Игроки поддерживают фаворита: ${marketsData[7].marketLabel} держится на ${marketsData[7].loadPercent}% прогруза.`
+  })
+];
+
 const state = {
-  theme: localStorage.getItem("tt-theme") || "dark"
+  theme: localStorage.getItem("tt-theme") || "dark",
+  lastUpdate: Date.now(),
+  refreshIntervalId: null,
+  relativeIntervalId: null
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -153,6 +187,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFilters();
   renderMarkets();
   renderAnalytics();
+  renderLiveFeed();
+  markUpdated();
+  scheduleAutoRefresh();
   attachEventListeners();
 });
 
@@ -190,44 +227,47 @@ function renderMarkets() {
 
   grid.innerHTML = "";
 
-  marketsData
+  const filteredMarkets = marketsData
     .filter(item => (sportFilter === "all" || item.sport === sportFilter))
     .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
-    .filter(item => (marketFilter === "all" || item.market === marketFilter))
-    .forEach(item => {
-      const card = document.createElement("article");
-      card.className = "market-card";
-      card.role = "listitem";
-      card.innerHTML = `
-        <div class="market-card__header">
-          <div>
-            <h3>${item.match}</h3>
-            <div class="market-card__meta">${item.sport} · ${item.tournament} · ${item.stage}</div>
-          </div>
-          <span class="impact">${item.impact}</span>
-        </div>
-        <div class="progress">
-          <div class="progress__label">
-            <span>${item.marketLabel}</span>
-            <span>${item.loadPercent}%</span>
-          </div>
-          <div class="progress__bar">
-            <span class="progress__fill" style="transform: scaleX(${item.loadPercent / 100})"></span>
-          </div>
-        </div>
-        <div class="market-card__meta">
-          Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Ставка в ${item.time}
-        </div>
-        <div class="market-card__meta">
-          Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
-        </div>
-      `;
-      grid.append(card);
-    });
+    .filter(item => (marketFilter === "all" || item.market === marketFilter));
 
-  if (!grid.children.length) {
+  filteredMarkets.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "market-card";
+    card.role = "listitem";
+    card.innerHTML = `
+      <div class="market-card__header">
+        <div>
+          <h3>${item.match}</h3>
+          <div class="market-card__meta">${item.sport} · ${item.tournament} · ${item.stage}</div>
+        </div>
+        <span class="impact">${item.impact}</span>
+      </div>
+      <div class="progress">
+        <div class="progress__label">
+          <span>${item.marketLabel}</span>
+          <span>${item.loadPercent}%</span>
+        </div>
+        <div class="progress__bar">
+          <span class="progress__fill" style="transform: scaleX(${item.loadPercent / 100})"></span>
+        </div>
+      </div>
+      <div class="market-card__meta">
+        Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Ставка в ${item.time}
+      </div>
+      <div class="market-card__meta">
+        Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
+      </div>
+    `;
+    grid.append(card);
+  });
+
+  if (!filteredMarkets.length) {
     grid.innerHTML = `<div class="empty-state">Нет прогнозов по выбранным фильтрам</div>`;
   }
+
+  renderSignals(filteredMarkets);
 }
 
 function renderAnalytics() {
@@ -260,10 +300,163 @@ function renderAnalytics() {
   });
 }
 
+function renderSignals(source = marketsData) {
+  const signalList = document.getElementById("signal-list");
+  if (!signalList) return;
+
+  signalList.innerHTML = "";
+
+  const candidates = [...source]
+    .sort((a, b) => {
+      if (b.loadPercent === a.loadPercent) {
+        return b.loadValue - a.loadValue;
+      }
+      return b.loadPercent - a.loadPercent;
+    })
+    .slice(0, 3);
+
+  if (!candidates.length) {
+    const empty = document.createElement("li");
+    empty.className = "live-card__item live-card__item--empty";
+    empty.textContent = "Нет сигналов по текущим фильтрам";
+    signalList.append(empty);
+    return;
+  }
+
+  candidates.forEach(item => {
+    const li = document.createElement("li");
+    li.className = "live-card__item";
+    const oddsFell = item.oddsCurrent < item.oddsStart;
+    const trendClass = `trend ${oddsFell ? "trend--down" : "trend--up"}`;
+    const arrow = oddsFell ? "↓" : "↑";
+    const delta = Math.abs(item.oddsCurrent - item.oddsStart).toFixed(2);
+    li.innerHTML = `
+      <strong>${item.match}</strong>
+      <div class="live-card__meta">
+        <span>${item.tournament} · ${item.sport}</span>
+        <span class="${trendClass}">${arrow} ${item.oddsCurrent.toFixed(2)}</span>
+      </div>
+      <div class="live-card__meta">
+        <span>Прогруз ${item.loadPercent}%</span>
+        <span>Δ ${oddsFell ? "-" : "+"}${delta}</span>
+      </div>
+    `;
+    signalList.append(li);
+  });
+}
+
+function renderLiveFeed() {
+  const feed = document.getElementById("live-feed");
+  if (!feed) return;
+
+  feed.innerHTML = "";
+
+  if (!liveFeedEvents.length) {
+    const empty = document.createElement("li");
+    empty.className = "live-feed__item";
+    empty.innerHTML = `
+      <div class="live-feed__title">Лента пуста</div>
+      <div class="live-feed__text">Ожидаем новые события перед стартом матчей.</div>
+    `;
+    feed.append(empty);
+    return;
+  }
+
+  liveFeedEvents.slice(0, 6).forEach(event => {
+    const li = document.createElement("li");
+    li.className = "live-feed__item";
+    const badgeClass = `live-feed__badge${event.type === "alert" ? " live-feed__badge--alert" : ""}`;
+    const badgeLabels = { alert: "АЛЕРТ", trend: "ТРЕНД", live: "LIVE" };
+    const badgeLabel = badgeLabels[event.type] || event.type.toUpperCase();
+    const timestamp = new Date(event.timestamp);
+    li.innerHTML = `
+      <header>
+        <span>${formatClock(timestamp)}</span>
+        <span class="${badgeClass}">${badgeLabel}</span>
+      </header>
+      <div class="live-feed__title">${event.title}</div>
+      <div class="live-feed__text">${event.description}</div>
+      <div class="live-card__meta">
+        <span>${event.context}</span>
+        <span>${formatRelativeTime(timestamp)}</span>
+      </div>
+    `;
+    feed.append(li);
+  });
+}
+
+function refreshLiveData(source = "auto") {
+  const market = pickRandom(marketsData);
+  if (!market) return;
+
+  const previousOdds = market.oddsCurrent;
+  const oddsShift = (Math.random() * 0.05 + 0.01) * (Math.random() > 0.5 ? -1 : 1);
+  const nextOdds = clampOdds(market.oddsCurrent * (1 + oddsShift));
+  market.oddsCurrent = Number(nextOdds.toFixed(2));
+
+  const loadShift = Math.round((Math.random() * 5 + 2) * (oddsShift < 0 ? 1 : -1));
+  market.loadPercent = clampPercent(market.loadPercent + loadShift);
+  const volumeMultiplier = loadShift > 0 ? 1 + Math.random() * 0.05 : 1 + Math.random() * 0.03;
+  market.loadValue = Math.max(50000, Math.round(market.loadValue * volumeMultiplier));
+
+  market.movement.push(market.loadPercent);
+  market.movement = market.movement.slice(-4);
+
+  const oddsDifference = Math.abs(market.oddsCurrent - previousOdds).toFixed(2);
+  const oddsFell = market.oddsCurrent < previousOdds;
+  const eventType = source === "manual" ? "live" : oddsFell ? "alert" : "trend";
+  const description = `Ставка ${market.marketLabel.toLowerCase()} ${oddsFell ? "получила дополнительный прогруз" : "испытывает коррекцию"}: коэффициент ${oddsFell ? "опустился" : "поднялся"} до ${market.oddsCurrent.toFixed(2)} (Δ ${oddsDifference}). Объём ${formatCurrency(market.loadValue)} при ${market.loadPercent}% ставок.`;
+
+  liveFeedEvents.unshift({
+    id: `event-${Date.now()}`,
+    timestamp: Date.now(),
+    type: eventType,
+    context: `${market.tournament} · ${market.sport}`,
+    title: market.match,
+    description
+  });
+
+  if (liveFeedEvents.length > 12) {
+    liveFeedEvents = liveFeedEvents.slice(0, 12);
+  }
+
+  renderMarkets();
+  renderAnalytics();
+  renderLiveFeed();
+  markUpdated();
+}
+
+function scheduleAutoRefresh() {
+  if (state.refreshIntervalId) {
+    clearInterval(state.refreshIntervalId);
+  }
+  if (state.relativeIntervalId) {
+    clearInterval(state.relativeIntervalId);
+  }
+
+  state.refreshIntervalId = setInterval(() => refreshLiveData("auto"), 45000);
+  state.relativeIntervalId = setInterval(updateLastUpdate, 15000);
+}
+
+function updateLastUpdate() {
+  const label = document.getElementById("last-update");
+  if (!label) return;
+  label.textContent = `Обновлено ${formatRelativeTime(new Date(state.lastUpdate))}`;
+}
+
+function markUpdated() {
+  state.lastUpdate = Date.now();
+  updateLastUpdate();
+}
+
 function attachEventListeners() {
   document.getElementById("sport-filter").addEventListener("change", renderMarkets);
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
+
+  document.getElementById("manual-refresh").addEventListener("click", () => {
+    refreshLiveData("manual");
+  });
 
   document.getElementById("toggle-theme").addEventListener("click", () => {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -306,4 +499,52 @@ function clearAdditionalOptions(select) {
       option.remove();
     }
   });
+}
+
+function formatRelativeTime(date) {
+  const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSeconds < 10) {
+    return "только что";
+  }
+  if (diffSeconds < 60) {
+    return `${diffSeconds} сек. назад`;
+  }
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) {
+    return `${diffMinutes} мин. назад`;
+  }
+  const diffHours = Math.floor(diffMinutes / 60);
+  return `${diffHours} ч. назад`;
+}
+
+function formatClock(date) {
+  return date.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function pickRandom(array) {
+  if (!array.length) return null;
+  const index = Math.floor(Math.random() * array.length);
+  return array[index];
+}
+
+function clampPercent(value) {
+  return Math.max(35, Math.min(92, value));
+}
+
+function clampOdds(value) {
+  return Math.max(1.35, Math.min(2.65, value));
+}
+
+function createFeedEvent({ minutesAgo, type, context, title, description }) {
+  return {
+    id: `seed-${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: Date.now() - minutesAgo * 60 * 1000,
+    type,
+    context,
+    title,
+    description
+  };
 }
