@@ -1,4 +1,4 @@
-const marketsData = [
+let marketsData = [
   {
     id: 1,
     tournament: "WTT Contender Doha",
@@ -73,6 +73,36 @@ const marketsData = [
     impact: "Высокий",
     time: "21:10 MSK",
     movement: [54, 58, 65, 69]
+  },
+  {
+    id: 6,
+    tournament: "ITTF Challenge Любляна",
+    stage: "Мужчины, четвертьфинал",
+    match: "Томас Ларсен — Тимо Болль",
+    market: "match_winner",
+    marketLabel: "Победа Тимо Болль",
+    loadPercent: 61,
+    oddsStart: 1.68,
+    oddsCurrent: 1.62,
+    loadValue: 56000,
+    impact: "Средний",
+    time: "18:40 MSK",
+    movement: [48, 55, 59, 61]
+  },
+  {
+    id: 7,
+    tournament: "Pro Liga",
+    stage: "Женщины, финал",
+    match: "Мария Мальцева — Соня Журавлёва",
+    market: "total_points",
+    marketLabel: "Тотал больше 77.5",
+    loadPercent: 73,
+    oddsStart: 1.88,
+    oddsCurrent: 1.74,
+    loadValue: 69000,
+    impact: "Высокий",
+    time: "22:05 MSK",
+    movement: [58, 63, 69, 73]
   }
 ];
 
@@ -82,15 +112,14 @@ const officials = [
   { name: "Лю Мин", stability: "+4.7% ROI", matches: 21 }
 ];
 
-const forecasts = [
-  { market: "Победа Линь Юнжу", delta: "-0.08", confidence: 82 },
-  { market: "Тотал больше 75.5", delta: "-0.04", confidence: 68 },
-  { market: "Фора (-2.5) Боруссия", delta: "-0.11", confidence: 74 }
-];
-
 const state = {
-  theme: localStorage.getItem("tt-theme") || "light"
+  theme: localStorage.getItem("tt-theme") || "light",
+  search: "",
+  lastUpdated: null
 };
+
+let refreshTimer = null;
+const REFRESH_INTERVAL = 45000;
 
 document.addEventListener("DOMContentLoaded", () => {
   if (state.theme === "dark") {
@@ -101,12 +130,22 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFilters();
   renderMarkets();
   renderAnalytics();
+  state.lastUpdated = new Date();
+  renderLastUpdated();
   attachEventListeners();
+  startAutoRefresh();
 });
 
 function renderFilters() {
   const tournamentSelect = document.getElementById("tournament-filter");
-  const tournaments = ["all", ...new Set(marketsData.map(item => item.tournament))];
+  const tournaments = [
+    "all",
+    ...new Set(
+      marketsData
+        .map(item => item.tournament)
+        .sort((a, b) => a.localeCompare(b, "ru"))
+    )
+  ];
 
   tournaments.forEach(tournament => {
     if (tournament === "all") return;
@@ -121,16 +160,24 @@ function renderMarkets() {
   const grid = document.getElementById("markets-grid");
   const tournamentFilter = document.getElementById("tournament-filter").value;
   const marketFilter = document.getElementById("market-filter").value;
+  const searchTerm = state.search.trim().toLowerCase();
 
   grid.innerHTML = "";
 
   marketsData
     .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
     .filter(item => (marketFilter === "all" || item.market === marketFilter))
+    .filter(item =>
+      !searchTerm ||
+      item.match.toLowerCase().includes(searchTerm) ||
+      item.tournament.toLowerCase().includes(searchTerm) ||
+      item.marketLabel.toLowerCase().includes(searchTerm)
+    )
     .forEach(item => {
       const card = document.createElement("article");
       card.className = "market-card";
       card.role = "listitem";
+      const oddsDelta = item.oddsCurrent - item.oddsStart;
       card.innerHTML = `
         <div class="market-card__header">
           <div>
@@ -154,6 +201,10 @@ function renderMarkets() {
         <div class="market-card__meta">
           Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
         </div>
+        <div class="market-card__trend ${oddsDelta <= 0 ? "trend--down" : "trend--up"}">
+          <span>${oddsDelta <= 0 ? "Понижение коэффициента" : "Рост коэффициента"}</span>
+          <span>${formatDelta(oddsDelta)}</span>
+        </div>
       `;
       grid.append(card);
     });
@@ -169,7 +220,9 @@ function renderAnalytics() {
 
   const sparkline = document.getElementById("sparkline");
   sparkline.innerHTML = "";
-  const sparkPoints = normalizeSparkline(marketsData.map(item => item.loadPercent));
+  const sparkPoints = normalizeSparkline(
+    marketsData.map(item => item.movement[item.movement.length - 1])
+  );
   sparkPoints.forEach(point => {
     const bar = document.createElement("span");
     bar.style.height = `${point}%`;
@@ -186,7 +239,7 @@ function renderAnalytics() {
 
   const forecastList = document.getElementById("forecast");
   forecastList.innerHTML = "";
-  forecasts.forEach(item => {
+  deriveForecasts().forEach(item => {
     const li = document.createElement("li");
     li.innerHTML = `<span>${item.market}</span><span>${item.delta} (уверенность ${item.confidence}%)</span>`;
     forecastList.append(li);
@@ -196,6 +249,10 @@ function renderAnalytics() {
 function attachEventListeners() {
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
+  document.getElementById("match-search").addEventListener("input", event => {
+    state.search = event.target.value;
+    renderMarkets();
+  });
 
   document.getElementById("toggle-theme").addEventListener("click", () => {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -212,6 +269,20 @@ function attachEventListeners() {
 
     trigger.setAttribute("aria-expanded", String(!expanded));
     panel.hidden = expanded;
+  });
+
+  document.getElementById("refresh-data").addEventListener("click", () => {
+    simulateMarketShift();
+    startAutoRefresh();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopAutoRefresh();
+    } else {
+      simulateMarketShift();
+      startAutoRefresh();
+    }
   });
 }
 
@@ -230,4 +301,87 @@ function normalizeSparkline(values) {
     return values.map(() => 60);
   }
   return values.map(value => 30 + ((value - min) / (max - min)) * 70);
+}
+
+function deriveForecasts() {
+  return [...marketsData]
+    .sort((a, b) => b.loadPercent - a.loadPercent)
+    .slice(0, 3)
+    .map(item => {
+      const oddsDelta = item.oddsCurrent - item.oddsStart;
+      const deltaLabel = `${oddsDelta >= 0 ? "+" : ""}${oddsDelta.toFixed(2)}`;
+      const volatility = Math.abs(item.movement[item.movement.length - 1] - item.movement[0]);
+      const confidence = Math.max(62, Math.min(95, item.loadPercent - Math.round(oddsDelta * 25) + volatility));
+      return {
+        market: item.marketLabel,
+        delta: deltaLabel,
+        confidence
+      };
+    });
+}
+
+function simulateMarketShift() {
+  const now = new Date();
+  marketsData = marketsData.map(item => {
+    const momentum = Math.random() * 8 - 4;
+    const newLoad = clamp(Math.round(item.loadPercent + momentum), 42, 95);
+    const oddsDirection = newLoad >= item.loadPercent ? -1 : 1;
+    const oddsDrift = Math.random() * 0.15;
+    const newOdds = clampOdds(Number((item.oddsCurrent + oddsDirection * oddsDrift).toFixed(2)));
+    const updatedMovement = [...item.movement.slice(1), newLoad];
+    const volumeFactor = 1 + (newLoad - item.loadPercent) / 120 + (Math.random() - 0.5) * 0.08;
+    const newLoadValue = Math.max(24000, Math.round(item.loadValue * volumeFactor));
+
+    return {
+      ...item,
+      loadPercent: newLoad,
+      oddsCurrent: newOdds,
+      loadValue: newLoadValue,
+      time: `${formatTime(now)} MSK`,
+      movement: updatedMovement
+    };
+  });
+
+  state.lastUpdated = now;
+  renderMarkets();
+  renderAnalytics();
+  renderLastUpdated();
+}
+
+function renderLastUpdated() {
+  const lastUpdateNode = document.getElementById("last-update");
+  if (!lastUpdateNode || !state.lastUpdated) return;
+  lastUpdateNode.textContent = `Обновлено: ${formatTime(state.lastUpdated)} MSK`;
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  refreshTimer = setInterval(simulateMarketShift, REFRESH_INTERVAL);
+}
+
+function stopAutoRefresh() {
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
+function formatTime(date) {
+  return date.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function formatDelta(delta) {
+  const sign = delta > 0 ? "+" : "";
+  return `${sign}${delta.toFixed(2)}`;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function clampOdds(value) {
+  return Math.max(1.25, Math.min(value, 3.2));
 }

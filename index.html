@@ -48,24 +48,42 @@
           <h2>Актуальные прогрузы</h2>
           <p>Лента обновляется каждые 15 минут. Данные агрегируются из крупнейших букмекерских компаний.</p>
         </div>
-        <div class="filters">
-          <label class="filter">
-            <span>Турнир</span>
-            <select id="tournament-filter">
-              <option value="all">Все</option>
-            </select>
-          </label>
-          <label class="filter">
-            <span>Рынок</span>
-            <select id="market-filter">
-              <option value="all">Все</option>
-              <option value="match_winner">Победа</option>
-              <option value="total_points">Тотал</option>
-              <option value="handicap">Фора</option>
-            </select>
-          </label>
+        <div class="controls">
+          <div class="filters" role="group" aria-label="Фильтрация прогрузов">
+            <label class="filter">
+              <span>Турнир</span>
+              <select id="tournament-filter">
+                <option value="all">Все</option>
+              </select>
+            </label>
+            <label class="filter">
+              <span>Рынок</span>
+              <select id="market-filter">
+                <option value="all">Все</option>
+                <option value="match_winner">Победа</option>
+                <option value="total_points">Тотал</option>
+                <option value="handicap">Фора</option>
+              </select>
+            </label>
+            <label class="filter filter--search">
+              <span>Поиск</span>
+              <input id="match-search" type="search" placeholder="Игрок, турнир или рынок" autocomplete="off">
+            </label>
+          </div>
+          <div class="controls__actions">
+            <div class="refresh" aria-live="polite">
+              <span class="refresh__timestamp" id="last-update">Обновлено: —</span>
+              <button class="btn btn--ghost btn--small" type="button" id="refresh-data">Обновить</button>
+            </div>
+          </div>
         </div>
       </header>
+      <div class="impact-legend" role="note">
+        <span class="impact-legend__title">Легенда интенсивности:</span>
+        <span class="chip chip--extreme">Экстремальный</span>
+        <span class="chip chip--high">Высокий</span>
+        <span class="chip chip--medium">Средний</span>
+      </div>
       <div class="markets__grid" id="markets-grid" role="list"></div>
     </section>
 
