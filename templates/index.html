@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header class="site-header">
+  <div class="logo">Sport Loads</div>
+  <nav class="site-nav">
+    <a href="#overview">Обзор</a>
+    <a href="#markets">Прогрузы</a>
+    <a href="#analytics">Аналитика</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" id="overview">
+    <div class="hero__content">
+      <h1>Прогрузы на спорт в реальном времени</h1>
+      <p>
+        Отслеживайте смещения линий и объём ставок по ключевым турнирам футбола, баскетбола, тенниса, хоккея и других дисциплин, чтобы находить ранние тренды и сильные движения коэффициентов.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#markets">Перейти к ленте прогрузов</a>
+        <button class="btn btn--ghost" id="toggle-theme">Тёмная тема</button>
+      </div>
+    </div>
+    <div class="hero__illustration" aria-hidden="true">
+      <div class="hero__radar">
+        <div class="hero__radar-ring"></div>
+        <div class="hero__radar-ring hero__radar-ring--middle"></div>
+        <div class="hero__radar-ring hero__radar-ring--outer"></div>
+        <span class="hero__pulse hero__pulse--football">⚽</span>
+        <span class="hero__pulse hero__pulse--basketball">🏀</span>
+        <span class="hero__pulse hero__pulse--tennis">🎾</span>
+        <span class="hero__pulse hero__pulse--hockey">🏒</span>
+      </div>
+      <div class="hero__ticker">
+        {% for message in ticker_messages %}
+        <div class="ticker__row">
+          <span>{{ message.label }}</span>
+          <span>{{ message.text }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="markets" id="markets">
+    <header class="section-header">
+      <div>
+        <h2>Актуальные прогрузы</h2>
+        <p>Лента обновляется каждые 15 минут. Данные агрегируются из крупнейших букмекерских компаний.</p>
+      </div>
+      <div class="filters">
+        <label class="filter">
+          <span>Вид спорта</span>
+          <select id="sport-filter">
+            <option value="all">Все</option>
+            {% for sport in sports %}
+            <option value="{{ sport }}">{{ sport }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="filter">
+          <span>Турнир</span>
+          <select id="tournament-filter">
+            <option value="all">Все</option>
+            {% for tournament in tournaments %}
+            <option value="{{ tournament }}">{{ tournament }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="filter">
+          <span>Рынок</span>
+          <select id="market-filter">
+            <option value="all">Все</option>
+            <option value="match_winner">Победа</option>
+            <option value="total_points">Тотал</option>
+            <option value="handicap">Фора</option>
+            <option value="both_score">Обе забьют</option>
+          </select>
+        </label>
+      </div>
+    </header>
+    <div class="markets__grid" id="markets-grid" role="list"></div>
+  </section>
+
+  <section class="analytics" id="analytics">
+    <div class="analytics__card">
+      <h3>Температура рынка</h3>
+      <p>Суммарный объём ставок за последние 24 часа.</p>
+      <div class="analytics__value" id="total-volume">—</div>
+      <div class="sparkline" id="sparkline" aria-hidden="true"></div>
+    </div>
+    <div class="analytics__card">
+      <h3>Стабильные турниры</h3>
+      <p>Лиги и соревнования, где прогрузы чаще всего подтверждаются результатом.</p>
+      <ul class="top-officials" id="top-officials"></ul>
+    </div>
+    <div class="analytics__card">
+      <h3>Прогноз движения</h3>
+      <p>Предполагаемое изменение коэффициентов в ближайшие 30 минут по ключевым рынкам.</p>
+      <ul class="forecast" id="forecast"></ul>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2>Частые вопросы</h2>
+    <div class="accordion" id="faq-accordion">
+      {% for item in faqs %}
+      <article class="accordion__item">
+        <button class="accordion__trigger" aria-expanded="false">
+          {{ item.question }}
+          <span class="accordion__icon">+</span>
+        </button>
+        <div class="accordion__panel" hidden>
+          <p>{{ item.answer }}</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div>
+    <strong>Sport Loads</strong> — мониторинг прогрузов на топовые спортивные события.
+  </div>
+  <div class="footer-links">
+    <a href="#overview">Наверх</a>
+    <a href="mailto:analytics@ttloads.ru">Связаться</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.sportLoads = {{ loads|tojson }};
+  window.stableTournaments = {{ stable_tournaments|tojson }};
+  window.forecasts = {{ forecasts|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
