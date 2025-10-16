@@ -590,18 +590,6 @@ main {
   font-size: 1.2rem;
 }
 
-.market-card__range {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.market-card__range span:last-child {
-  color: var(--accent);
-}
-
 .market-card__meta {
   color: var(--text-muted);
   font-size: 0.92rem;
