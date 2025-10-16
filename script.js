@@ -1,186 +1,218 @@
 const marketsData = [
   {
     id: 1,
-    sport: "Футбол",
-    tournament: "Лига чемпионов УЕФА",
-    stage: "1/2 финала",
-    match: "Манчестер Сити — Реал Мадрид",
-    market: "match_winner",
-    marketLabel: "Победа Манчестер Сити",
-    loadPercent: 74,
-    oddsStart: 1.95,
-    oddsCurrent: 1.68,
-    loadValue: 325000,
-    impact: "Высокий",
-    time: "22:00 MSK",
-    movement: [52, 61, 68, 74]
+    sport: "Баскетбол",
+    tournament: "NBA Плей-офф",
+    stage: "4-я четверть · 6:12",
+    match: "Денвер Наггетс — Миннесота Тимбервулвз",
+    market: "total_goals",
+    marketLabel: "Коридор тотала 216.5–221.5",
+    loadPercent: 72,
+    oddsStart: 1.92,
+    oddsCurrent: 1.88,
+    loadValue: 342000,
+    impact: "Экстремальный",
+    time: "05:40 MSK",
+    movement: [58, 63, 68, 72],
+    windowSize: 5,
+    windowLabel: "Запас 5 очков",
+    margin: 7.2,
+    books: 5
   },
   {
     id: 2,
-    sport: "Баскетбол",
-    tournament: "NBA Плей-офф",
-    stage: "Матч 5",
-    match: "Лос-Анджелес Лейкерс — Голден Стэйт Уорриорз",
-    market: "total_goals",
-    marketLabel: "Тотал очков больше 223.5",
-    loadPercent: 61,
-    oddsStart: 1.92,
-    oddsCurrent: 1.81,
-    loadValue: 214000,
+    sport: "Хоккей",
+    tournament: "KHL Плей-офф",
+    stage: "3-й период · 11:03",
+    match: "Ак Барс — Авангард",
+    market: "handicap",
+    marketLabel: "Фора -1.5 / -0.5",
+    loadPercent: 64,
+    oddsStart: 1.83,
+    oddsCurrent: 2.12,
+    loadValue: 248000,
     impact: "Высокий",
-    time: "05:30 MSK",
-    movement: [45, 52, 57, 61]
+    time: "22:50 MSK",
+    movement: [46, 52, 59, 64],
+    windowSize: 1,
+    windowLabel: "Запас 1 шайба",
+    margin: 5.4,
+    books: 4
   },
   {
     id: 3,
-    sport: "Хоккей",
-    tournament: "NHL",
-    stage: "Регулярный сезон",
-    match: "Торонто Мэйпл Лифс — Бостон Брюинз",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) Торонто",
-    loadPercent: 58,
-    oddsStart: 2.15,
-    oddsCurrent: 1.94,
-    loadValue: 186000,
-    impact: "Средний",
-    time: "02:10 MSK",
-    movement: [41, 47, 53, 58]
+    sport: "Футбол",
+    tournament: "Serie A",
+    stage: "2-й тайм · 63'",
+    match: "Лацио — Милан",
+    market: "total_goals",
+    marketLabel: "Тотал 2.0 / 2.5",
+    loadPercent: 69,
+    oddsStart: 1.98,
+    oddsCurrent: 1.76,
+    loadValue: 198000,
+    impact: "Высокий",
+    time: "22:45 MSK",
+    movement: [51, 58, 64, 69],
+    windowSize: 0.5,
+    windowLabel: "Запас 0.5 мяча",
+    margin: 6.8,
+    books: 6
   },
   {
     id: 4,
     sport: "Теннис",
-    tournament: "ATP Masters Рим",
-    stage: "Полуфинал",
-    match: "Новак Джокович — Карлос Алькарас",
+    tournament: "WTA Мадрид",
+    stage: "1/4 финала",
+    match: "Ига Швёнтек — Арина Сабаленка",
     market: "total_goals",
-    marketLabel: "Тотал сетов больше 2.5",
-    loadPercent: 55,
-    oddsStart: 2.25,
-    oddsCurrent: 2.02,
-    loadValue: 98000,
+    marketLabel: "Тотал сетов 2.0 / 2.5",
+    loadPercent: 57,
+    oddsStart: 1.88,
+    oddsCurrent: 2.14,
+    loadValue: 112000,
     impact: "Средний",
-    time: "17:30 MSK",
-    movement: [38, 44, 50, 55]
+    time: "18:30 MSK",
+    movement: [39, 45, 51, 57],
+    windowSize: 1,
+    windowLabel: "Запас 1 сет",
+    margin: 4.9,
+    books: 4
   },
   {
     id: 5,
-    sport: "Единоборства",
-    tournament: "UFC 300",
-    stage: "Главный бой",
-    match: "Ислам Махачев — Чарльз Оливейра",
+    sport: "Киберспорт",
+    tournament: "CS:GO Major",
+    stage: "Гранд-финал · карта 2",
+    match: "Vitality — FaZe Clan",
     market: "match_winner",
-    marketLabel: "Победа Ислам Махачев",
-    loadPercent: 73,
-    oddsStart: 1.85,
-    oddsCurrent: 1.64,
-    loadValue: 248000,
-    impact: "Экстремальный",
-    time: "07:15 MSK",
-    movement: [55, 61, 67, 73]
+    marketLabel: "Победа Vitality / FaZe",
+    loadPercent: 61,
+    oddsStart: 1.91,
+    oddsCurrent: 2.08,
+    loadValue: 174000,
+    impact: "Высокий",
+    time: "20:10 MSK",
+    movement: [43, 49, 55, 61],
+    windowSize: 0.35,
+    windowLabel: "Диапазон 3.5%",
+    margin: 3.5,
+    books: 5
   },
   {
     id: 6,
-    sport: "Киберспорт",
-    tournament: "The International",
-    stage: "Гранд-финал",
-    match: "Team Spirit — Gaimin Gladiators",
-    market: "match_winner",
-    marketLabel: "Победа Team Spirit",
-    loadPercent: 67,
-    oddsStart: 2.10,
-    oddsCurrent: 1.88,
-    loadValue: 198000,
-    impact: "Высокий",
-    time: "14:00 MSK",
-    movement: [49, 55, 62, 67]
+    sport: "Футбол",
+    tournament: "MLS",
+    stage: "1-й тайм · 28'",
+    match: "Интер Майами — Орландо Сити",
+    market: "both_score",
+    marketLabel: "Обе забьют Да / Нет",
+    loadPercent: 54,
+    oddsStart: 1.88,
+    oddsCurrent: 2.06,
+    loadValue: 126000,
+    impact: "Средний",
+    time: "03:15 MSK",
+    movement: [36, 41, 48, 54],
+    windowSize: 0.18,
+    windowLabel: "Маржа 3.2%",
+    margin: 3.2,
+    books: 4
   },
   {
     id: 7,
-    sport: "Футбол",
-    tournament: "Мир РПЛ",
-    stage: "Тур 26",
-    match: "Зенит — ЦСКА",
-    market: "both_score",
-    marketLabel: "Обе забьют — Да",
-    loadPercent: 63,
-    oddsStart: 1.95,
-    oddsCurrent: 1.82,
-    loadValue: 156000,
-    impact: "Средний",
-    time: "19:00 MSK",
-    movement: [44, 49, 56, 63]
+    sport: "Баскетбол",
+    tournament: "Евролига",
+    stage: "3-я четверть · 3:41",
+    match: "Панатинаикос — Монако",
+    market: "handicap",
+    marketLabel: "Фора -2.5 / +5.5",
+    loadPercent: 66,
+    oddsStart: 1.90,
+    oddsCurrent: 1.84,
+    loadValue: 152000,
+    impact: "Высокий",
+    time: "21:30 MSK",
+    movement: [48, 52, 60, 66],
+    windowSize: 8,
+    windowLabel: "Запас 8 очков",
+    margin: 5.9,
+    books: 5
   },
   {
     id: 8,
-    sport: "Баскетбол",
-    tournament: "Евролига",
-    stage: "Финал четырёх",
-    match: "Фенербахче — Олимпиакос",
-    market: "handicap",
-    marketLabel: "Фора (+4.5) Олимпиакос",
-    loadPercent: 57,
-    oddsStart: 1.98,
-    oddsCurrent: 1.86,
-    loadValue: 142000,
+    sport: "Хоккей",
+    tournament: "NHL",
+    stage: "2-й период · 14:27",
+    match: "Торонто Мэйпл Лифс — Флорида Пантерз",
+    market: "total_goals",
+    marketLabel: "Тотал 5.0 / 6.0",
+    loadPercent: 59,
+    oddsStart: 1.82,
+    oddsCurrent: 1.96,
+    loadValue: 165000,
     impact: "Средний",
-    time: "21:45 MSK",
-    movement: [39, 45, 51, 57]
+    time: "02:05 MSK",
+    movement: [42, 47, 53, 59],
+    windowSize: 1,
+    windowLabel: "Запас 1 шайба",
+    margin: 4.6,
+    books: 5
   }
 ];
 
 const stableTournaments = [
-  { name: "Лига чемпионов УЕФА", stability: "+7.8% ROI", matches: 48 },
-  { name: "NBA Плей-офф", stability: "+6.4% ROI", matches: 36 },
-  { name: "NHL регулярный сезон", stability: "+5.2% ROI", matches: 41 }
+  { name: "NBA Плей-офф", stability: "Охват 92%", matches: 26 },
+  { name: "KHL плей-офф", stability: "Маржа +6.1%", matches: 18 },
+  { name: "Serie A", stability: "Ширина 0.45 мяча", matches: 27 }
 ];
 
 const forecasts = [
-  { market: "Сити — победа", delta: "-0.11", confidence: 89 },
-  { market: "Лейкерс vs Уорриорз тотал 223.5", delta: "-0.07", confidence: 76 },
-  { market: "Махачев — победа", delta: "-0.08", confidence: 92 }
+  { market: "Наггетс — Тимбервулвз тотал", delta: "-0.7 очка", confidence: 88 },
+  { market: "Ак Барс — Авангард фора", delta: "-0.4 шайбы", confidence: 74 },
+  { market: "Лацио — Милан тотал", delta: "-0.2 мяча", confidence: 81 }
 ];
 
 const parlayIdeas = [
   {
     id: "combo-1",
-    title: "Вечерний фаворит",
+    title: "Коридорный вечер",
     risk: "Сбалансированный",
-    confidence: 82,
-    totalOdds: 3.84,
-    edge: "+7% EV",
+    confidence: 85,
+    totalOdds: 3.46,
+    edge: "+6% запас",
     legs: [
       { match: marketsData[0].match, pick: marketsData[0].marketLabel, sport: marketsData[0].sport },
-      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport }
+      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport }
     ],
-    comment: "Сочетание топовых линий из футбола и тенниса для вечернего прайм-тайма."
+    comment: "Сочетание NBA тотала и футбольного коридора из Серии A с устойчивым охватом."
   },
   {
     id: "combo-2",
-    title: "Ночная очередь",
+    title: "Ночной поток",
     risk: "Агрессивный",
-    confidence: 76,
-    totalOdds: 4.62,
-    edge: "+11% EV",
+    confidence: 78,
+    totalOdds: 4.58,
+    edge: "+9% запас",
     legs: [
       { match: marketsData[1].match, pick: marketsData[1].marketLabel, sport: marketsData[1].sport },
-      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport },
-      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport }
+      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport },
+      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport }
     ],
-    comment: "Риски выше нормы, зато покрываем NBA, NHL и киберспорт в одной связке."
+    comment: "Коридоры по хоккею, MLS и NHL закрывают ночной слот и диверсифицируют риск."
   },
   {
     id: "combo-3",
-    title: "Выходной экспресс",
+    title: "Прайм-тайм защита",
     risk: "Консервативный",
-    confidence: 88,
-    totalOdds: 2.91,
-    edge: "+5% EV",
+    confidence: 90,
+    totalOdds: 2.94,
+    edge: "+4% запас",
     legs: [
-      { match: marketsData[6].match, pick: marketsData[6].marketLabel, sport: marketsData[6].sport },
-      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport }
+      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport },
+      { match: marketsData[6].match, pick: marketsData[6].marketLabel, sport: marketsData[6].sport }
     ],
-    comment: "Подборка с упором на стабильные чемпионаты и умеренную волатильность."
+    comment: "Теннис и Евролигу объединяем для стабильного окна в вечернем прайме."
   }
 ];
 
@@ -192,28 +224,28 @@ let liveFeedEvents = [
     type: "alert",
     context: `${marketsData[0].tournament} · ${marketsData[0].sport}`,
     title: marketsData[0].match,
-    description: `Прогруз на ${marketsData[0].marketLabel.toLowerCase()} усилился — коэффициент упал до ${marketsData[0].oddsCurrent.toFixed(2)} при ${marketsData[0].loadPercent}% объёма.`
+    description: `Коридор «${marketsData[0].marketLabel}» удерживает ${marketsData[0].windowLabel.toLowerCase()} — верхний коэффициент ${marketsData[0].oddsCurrent.toFixed(2)}, охват ${marketsData[0].loadPercent}% по ${marketsData[0].books} конторам.`
   }),
   createFeedEvent({
     minutesAgo: 8,
     type: "trend",
     context: `${marketsData[1].tournament} · ${marketsData[1].sport}`,
     title: marketsData[1].match,
-    description: `Ставки на ${marketsData[1].marketLabel.toLowerCase()} растут: вероятность пробития увеличилась, текущий коэффициент ${marketsData[1].oddsCurrent.toFixed(2)}.`
+    description: `Фора держится в коридоре: «${marketsData[1].marketLabel}» даёт ${marketsData[1].windowLabel.toLowerCase()} при марже ${marketsData[1].margin.toFixed(1)}%.`
   }),
   createFeedEvent({
     minutesAgo: 12,
     type: "live",
     context: `${marketsData[5].tournament} · ${marketsData[5].sport}`,
     title: marketsData[5].match,
-    description: `Team Spirit получает поддержку сообщества: ${marketsData[5].loadPercent}% ставок и объём ${formatCurrency(marketsData[5].loadValue)}.`
+    description: `MLS окно «${marketsData[5].marketLabel}» собрало банк ${formatCurrency(marketsData[5].loadValue)} и охват ${marketsData[5].loadPercent}% у ${marketsData[5].books} букмекеров.`
   }),
   createFeedEvent({
     minutesAgo: 16,
     type: "trend",
     context: `${marketsData[6].tournament} · ${marketsData[6].sport}`,
     title: marketsData[6].match,
-    description: `Игроки ждут обмен голами: ${marketsData[6].marketLabel} держится на ${marketsData[6].loadPercent}% прогруза.`
+    description: `Евролига: ${marketsData[6].marketLabel} даёт ${marketsData[6].windowLabel.toLowerCase()}, коэффициенты ${marketsData[6].oddsStart.toFixed(2)} / ${marketsData[6].oddsCurrent.toFixed(2)}.`
   })
 ];
 
@@ -293,23 +325,27 @@ function renderMarkets() {
         </div>
         <span class="impact">${item.impact}</span>
       </div>
+      <div class="market-card__range">
+        <span>${item.marketLabel}</span>
+        <span>${item.windowLabel}</span>
+      </div>
       <div class="progress">
         <div class="progress__label">
-          <span>${item.marketLabel}</span>
-          <span>${item.loadPercent}%</span>
+          <span>Охват ${item.loadPercent}% · ${item.books} букмек.</span>
+          <span>Маржа ${item.margin.toFixed(1)}%</span>
         </div>
         <div class="progress__bar">
           <span class="progress__fill" style="transform: scaleX(${item.loadPercent / 100})"></span>
         </div>
       </div>
       <div class="market-card__meta">
-        Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Ставка в ${item.time}
+        Банк: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · ${item.stage}
       </div>
       <div class="market-card__meta">
-        Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
+        Коэффициенты: ${item.oddsStart.toFixed(2)} / ${item.oddsCurrent.toFixed(2)} · окно до ${item.time}
       </div>
       <div class="market-card__trend" aria-hidden="true">
-        <span class="market-card__trend-label">Динамика прогруза</span>
+        <span class="market-card__trend-label">Стабильность охвата</span>
         ${renderTrendline(item.movement)}
       </div>
     `;
@@ -317,7 +353,7 @@ function renderMarkets() {
   });
 
   if (!filteredMarkets.length) {
-    grid.innerHTML = `<div class="empty-state">Нет прогнозов по выбранным фильтрам</div>`;
+    grid.innerHTML = `<div class="empty-state">Нет коридоров по выбранным фильтрам</div>`;
   }
 
   renderSignals(filteredMarkets);
@@ -372,7 +408,7 @@ function renderSignals(source = marketsData) {
   if (!candidates.length) {
     const empty = document.createElement("li");
     empty.className = "live-card__item live-card__item--empty";
-    empty.textContent = "Нет сигналов по текущим фильтрам";
+    empty.textContent = "Нет коридоров по текущим фильтрам";
     signalList.append(empty);
     return;
   }
@@ -383,16 +419,16 @@ function renderSignals(source = marketsData) {
     const oddsFell = item.oddsCurrent < item.oddsStart;
     const trendClass = `trend ${oddsFell ? "trend--down" : "trend--up"}`;
     const arrow = oddsFell ? "↓" : "↑";
-    const delta = Math.abs(item.oddsCurrent - item.oddsStart).toFixed(2);
+    const direction = oddsFell ? "сужение" : "расширение";
     li.innerHTML = `
       <strong>${item.match}</strong>
       <div class="live-card__meta">
-        <span>${item.tournament} · ${item.sport}</span>
-        <span class="${trendClass}">${arrow} ${item.oddsCurrent.toFixed(2)}</span>
+        <span>${item.marketLabel}</span>
+        <span class="${trendClass}">${arrow} ${direction}</span>
       </div>
       <div class="live-card__meta">
-        <span>Прогруз ${item.loadPercent}%</span>
-        <span>Δ ${oddsFell ? "-" : "+"}${delta}</span>
+        <span>Охват ${item.loadPercent}% · ${item.books} букмек.</span>
+        <span>Коэфф. ${item.oddsStart.toFixed(2)} / ${item.oddsCurrent.toFixed(2)}</span>
       </div>
     `;
     signalList.append(li);
@@ -410,7 +446,7 @@ function renderLiveFeed() {
     empty.className = "live-feed__item";
     empty.innerHTML = `
       <div class="live-feed__title">Лента пуста</div>
-      <div class="live-feed__text">Ожидаем новые события перед стартом матчей.</div>
+      <div class="live-feed__text">Ожидаем новые окна от лайв-сканера.</div>
     `;
     feed.append(empty);
     return;
@@ -452,6 +488,8 @@ function refreshLiveData(source = "auto") {
   market.loadPercent = clampPercent(market.loadPercent + loadShift);
   const volumeMultiplier = loadShift > 0 ? 1 + Math.random() * 0.05 : 1 + Math.random() * 0.03;
   market.loadValue = Math.max(50000, Math.round(market.loadValue * volumeMultiplier));
+  const marginShift = (Math.random() * 0.6 + 0.1) * (oddsShift < 0 ? 1 : -1);
+  market.margin = Number(Math.max(1.5, Math.min(12, market.margin + marginShift)).toFixed(1));
 
   market.movement.push(market.loadPercent);
   market.movement = market.movement.slice(-4);
@@ -459,7 +497,8 @@ function refreshLiveData(source = "auto") {
   const oddsDifference = Math.abs(market.oddsCurrent - previousOdds).toFixed(2);
   const oddsFell = market.oddsCurrent < previousOdds;
   const eventType = source === "manual" ? "live" : oddsFell ? "alert" : "trend";
-  const description = `Ставка ${market.marketLabel.toLowerCase()} ${oddsFell ? "получила дополнительный прогруз" : "испытывает коррекцию"}: коэффициент ${oddsFell ? "опустился" : "поднялся"} до ${market.oddsCurrent.toFixed(2)} (Δ ${oddsDifference}). Объём ${formatCurrency(market.loadValue)} при ${market.loadPercent}% ставок.`;
+  const corridorDirection = oddsFell ? "сужается" : "расширяется";
+  const description = `Коридор «${market.marketLabel}» ${corridorDirection}: верхний коэффициент ${market.oddsCurrent.toFixed(2)} (Δ ${oddsDifference}). Охват ${market.loadPercent}% по ${market.books} букмекерам, банк ${formatCurrency(market.loadValue)}.`;
 
   liveFeedEvents.unshift({
     id: `event-${Date.now()}`,
@@ -664,16 +703,15 @@ function renderHeroStats() {
     marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
   );
   const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
+  const averageMargin = (
+    marketsData.reduce((sum, item) => sum + item.margin, 0) / totalMarkets
+  ).toFixed(1);
 
   const stats = [
-    { label: "Прогнозов в ленте", value: totalMarkets },
-    { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
+    { label: "Активных коридоров", value: totalMarkets },
+    { label: "Средний охват", value: `${averageLoad}%` },
+    { label: "Средняя маржа", value: `${averageMargin}%` },
+    { label: "Премиум окна", value: `${highImpactCount}` }
   ];
 
   container.innerHTML = stats
@@ -730,32 +768,42 @@ function renderInsights() {
     return;
   }
 
-  const busiestMarket = marketsData.reduce((acc, item) => (item.loadPercent > acc.loadPercent ? item : acc), marketsData[0]);
-  const sharpestMove = marketsData
-    .map(item => ({ ...item, delta: Math.abs(item.oddsCurrent - item.oddsStart) }))
-    .sort((a, b) => b.delta - a.delta)[0];
-  const heaviestVolume = marketsData.reduce((acc, item) => (item.loadValue > acc.loadValue ? item : acc), marketsData[0]);
+  const widestWindow = marketsData.reduce(
+    (acc, item) => (item.windowSize > acc.windowSize ? item : acc),
+    marketsData[0]
+  );
+  const bestCoverage = marketsData.reduce(
+    (acc, item) => (item.loadPercent > acc.loadPercent ? item : acc),
+    marketsData[0]
+  );
+  const heaviestVolume = marketsData.reduce(
+    (acc, item) => (item.loadValue > acc.loadValue ? item : acc),
+    marketsData[0]
+  );
   const averageLoad = Math.round(
     marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / marketsData.length
   );
+  const averageMargin = (
+    marketsData.reduce((sum, item) => sum + item.margin, 0) / marketsData.length
+  ).toFixed(1);
 
   const cards = [
     {
-      title: "Максимальный прогруз",
-      value: `${busiestMarket.loadPercent}%`,
-      caption: `${busiestMarket.match}`,
-      detail: `${busiestMarket.tournament} · ${busiestMarket.sport}`
+      title: "Самый широкий коридор",
+      value: `${widestWindow.windowLabel}`,
+      caption: `${widestWindow.match}`,
+      detail: `${widestWindow.tournament} · ${widestWindow.sport}`
     },
     {
-      title: "Резкое движение линии",
-      value: `${sharpestMove.delta.toFixed(2)}`,
-      caption: `${sharpestMove.oddsStart.toFixed(2)} → ${sharpestMove.oddsCurrent.toFixed(2)}`,
-      detail: `${sharpestMove.match}`
+      title: "Лучший охват",
+      value: `${bestCoverage.loadPercent}%`,
+      caption: `${bestCoverage.marketLabel}`,
+      detail: `${bestCoverage.match}`
     },
     {
-      title: "Пул объёма 24ч",
+      title: "Банк под контролем",
       value: `${formatCurrency(heaviestVolume.loadValue)}`,
-      caption: `${heaviestVolume.match}`,
+      caption: `${heaviestVolume.marketLabel}`,
       detail: `${heaviestVolume.tournament}`
     }
   ];
@@ -773,11 +821,13 @@ function renderInsights() {
     )
     .join("");
 
+  const timestampLabel = new Date().toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
   if (meta) {
-    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · ${new Date().toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+    meta.textContent = `Активно ${marketsData.length} коридоров · средний охват ${averageLoad}% · маржа ${averageMargin}% · ${timestampLabel}`;
   }
 }
 
