@@ -221,13 +221,19 @@ const state = {
   theme: localStorage.getItem("tt-theme") || "dark",
   lastUpdate: Date.now(),
   refreshIntervalId: null,
-  relativeIntervalId: null
+  relativeIntervalId: null,
+  searchTerm: ""
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.setAttribute("data-theme", state.theme);
   document.getElementById("toggle-theme").textContent =
     state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
+
+  const searchInput = document.getElementById("search-filter");
+  if (searchInput) {
+    searchInput.value = state.searchTerm;
+  }
 
   renderHeroStats();
   renderQuickFilters();
@@ -273,13 +279,22 @@ function renderMarkets() {
   const sportFilter = document.getElementById("sport-filter").value;
   const tournamentFilter = document.getElementById("tournament-filter").value;
   const marketFilter = document.getElementById("market-filter").value;
+  const searchTokens = getSearchTokens();
+  const hasSearch = searchTokens.length > 0;
 
   grid.innerHTML = "";
 
   const filteredMarkets = marketsData
     .filter(item => (sportFilter === "all" || item.sport === sportFilter))
     .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
-    .filter(item => (marketFilter === "all" || item.market === marketFilter));
+    .filter(item => (marketFilter === "all" || item.market === marketFilter))
+    .filter(item => matchesSearch(item, searchTokens));
+
+  const hasActiveFilters =
+    sportFilter !== "all" ||
+    tournamentFilter !== "all" ||
+    marketFilter !== "all" ||
+    hasSearch;
 
   filteredMarkets.forEach(item => {
     const card = document.createElement("article");
@@ -317,10 +332,15 @@ function renderMarkets() {
   });
 
   if (!filteredMarkets.length) {
-    grid.innerHTML = `<div class="empty-state">Нет прогнозов по выбранным фильтрам</div>`;
+    const sanitizedTerm = escapeHtml(state.searchTerm.trim());
+    const reason = hasActiveFilters
+      ? `по выбранным фильтрам${sanitizedTerm ? ` и запросу «${sanitizedTerm}»` : ""}`
+      : "в ленте";
+    grid.innerHTML = `<div class="empty-state${hasSearch ? " empty-state--highlight" : ""}">Нет прогнозов ${reason}</div>`;
   }
 
   renderSignals(filteredMarkets);
+  updateMarketsSummary(filteredMarkets.length, marketsData.length, hasActiveFilters);
   updateQuickFiltersActiveState();
 }
 
@@ -397,6 +417,39 @@ function renderSignals(source = marketsData) {
     `;
     signalList.append(li);
   });
+}
+
+function updateMarketsSummary(filteredCount, totalCount, hasActiveFilters) {
+  const summary = document.getElementById("markets-summary");
+  if (!summary) return;
+  const sanitizedTerm = escapeHtml(state.searchTerm.trim());
+  const baseMessage = hasActiveFilters
+    ? `Отфильтровано ${filteredCount} из ${totalCount} событий`
+    : `Доступно ${totalCount} событий в ленте прогнозов`;
+  const suffix = sanitizedTerm && hasActiveFilters ? ` по запросу «${sanitizedTerm}»` : "";
+  summary.innerHTML = `<span>${baseMessage}${suffix}</span>`;
+  summary.dataset.count = String(filteredCount);
+  summary.classList.toggle("market-summary--empty", filteredCount === 0);
+}
+
+function getSearchTokens() {
+  return state.searchTerm
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function matchesSearch(item, tokens) {
+  if (!tokens.length) return true;
+  const haystack = getSearchableContent(item);
+  return tokens.every(token => haystack.includes(token));
+}
+
+function getSearchableContent(item) {
+  return [item.match, item.marketLabel, item.tournament, item.sport, item.stage]
+    .join(" ")
+    .toLowerCase();
 }
 
 function renderLiveFeed() {
@@ -510,6 +563,19 @@ function attachEventListeners() {
   document.getElementById("sport-filter").addEventListener("change", renderMarkets);
   document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
   document.getElementById("market-filter").addEventListener("change", renderMarkets);
+
+  const searchInput = document.getElementById("search-filter");
+  if (searchInput) {
+    const onInput = debounce(event => {
+      state.searchTerm = event.target.value;
+      renderMarkets();
+    }, 220);
+    searchInput.addEventListener("input", onInput);
+    searchInput.addEventListener("search", event => {
+      state.searchTerm = event.target.value;
+      renderMarkets();
+    });
+  }
 
   const quickFilters = document.getElementById("quick-filters");
   if (quickFilters) {
@@ -701,6 +767,8 @@ function renderQuickFilters() {
     button.className = "quick-filter";
     button.dataset.value = sport;
     button.textContent = sport === "all" ? "Все виды" : sport;
+    button.setAttribute("aria-pressed", "false");
+    button.title = sport === "all" ? "Показать все виды спорта" : `Показать ${sport}`;
     container.append(button);
   });
 
@@ -713,7 +781,9 @@ function updateQuickFiltersActiveState() {
   if (!container || !sportSelect) return;
   const currentValue = sportSelect.value;
   container.querySelectorAll(".quick-filter").forEach(button => {
-    button.classList.toggle("quick-filter--active", button.dataset.value === currentValue);
+    const isActive = button.dataset.value === currentValue;
+    button.classList.toggle("quick-filter--active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
 }
 
@@ -882,4 +952,25 @@ function copyTextFallback(text) {
     console.error("Не удалось скопировать экспресс", error);
   }
   textarea.remove();
+}
+
+function escapeHtml(value = "") {
+  const entities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  };
+  return value.replace(/[&<>"']/g, character => entities[character] || character);
+}
+
+function debounce(fn, wait = 200) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn.apply(null, args);
+    }, wait);
+  };
 }
