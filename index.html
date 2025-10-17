@@ -3,6 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sportsverse Pulse — оптимизированный центр аналитики и value-прогнозов по ставкам на спорт с живыми линиями, экспрессами и калькулятором банка.">
+  <meta name="keywords" content="ставки на спорт, прогнозы, спортивная аналитика, value betting, экспресс, калькулятор банка">
+  <meta name="theme-color" content="#05060f">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://sportsversepulse.example/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sportsverse Pulse">
+  <meta property="og:title" content="Sportsverse Pulse — умные прогнозы и value-ставки">
+  <meta property="og:description" content="Следите за лайв-сигналами, value линиями и управляйте банкроллом через встроенный калькулятор.">
+  <meta property="og:url" content="https://sportsversepulse.example/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:image" content="https://sportsversepulse.example/preview.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sportsverse Pulse — умные прогнозы и value-ставки">
+  <meta name="twitter:description" content="Живые коэффициенты, value-сигналы и калькулятор ставок для управления банком.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23050d1f'/%3E%3Cpath d='M16 44l8-24 8 12 8-16 8 28' stroke='%2333f094' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <title>Sportsverse Pulse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,20 +26,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Перейти к основному контенту</a>
   <header class="site-header">
     <div class="logo">Sportsverse Pulse</div>
-    <nav class="site-nav">
+    <nav class="site-nav" aria-label="Основная навигация">
       <a href="#overview">Обзор</a>
       <a href="#live">Лайв</a>
       <a href="#insights">Пульс</a>
       <a href="#markets">Прогнозы</a>
+      <a href="#optimizer">Оптимизатор</a>
       <a href="#combos">Экспрессы</a>
       <a href="#analytics">Метрики</a>
       <a href="#faq">FAQ</a>
     </nav>
   </header>
 
-  <main>
+  <main id="main-content">
     <section class="hero" id="overview">
       <div class="hero__content">
         <h1>Прогнозы и сигналы по всем видам спорта</h1>
@@ -135,6 +153,59 @@
       <div class="markets__grid" id="markets-grid" role="list"></div>
     </section>
 
+    <section class="optimizer" id="optimizer">
+      <header class="section-header">
+        <div>
+          <h2>Оптимизатор ставок</h2>
+          <p>Выявляем value-линии и рассчитываем размер ставки по профилю риска для точного управления банкроллом.</p>
+        </div>
+        <div class="optimizer__meta" id="value-meta"></div>
+      </header>
+      <div class="optimizer__grid">
+        <article class="optimizer-card optimizer-card--value">
+          <h3>Лучшие value-линии</h3>
+          <p class="optimizer-card__hint">Учитываем модельные вероятности, текущие коэффициенты и объём ставок, чтобы найти положительное ожидание.</p>
+          <div class="value-table-wrapper" role="region" aria-live="polite" aria-label="Таблица value-линий">
+            <table class="value-table">
+              <thead>
+                <tr>
+                  <th scope="col">Событие</th>
+                  <th scope="col">Коэфф.</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">EV</th>
+                </tr>
+              </thead>
+              <tbody id="value-table"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="optimizer-card optimizer-card--bankroll">
+          <h3>Калькулятор банка</h3>
+          <p class="optimizer-card__hint">Используйте фракцию Келли и выберите профиль риска, чтобы не перерасходовать банк.</p>
+          <form class="bankroll-form" id="bankroll-form">
+            <label class="bankroll-form__field" for="bankroll-amount">
+              <span>Размер банка</span>
+              <input type="number" id="bankroll-amount" min="1000" step="500" value="50000" inputmode="numeric" aria-describedby="bankroll-note">
+            </label>
+            <label class="bankroll-form__field" for="bankroll-market">
+              <span>Ставка</span>
+              <select id="bankroll-market"></select>
+            </label>
+            <label class="bankroll-form__field" for="risk-profile">
+              <span>Профиль риска</span>
+              <select id="risk-profile">
+                <option value="conservative">Консервативный · 0.5 Келли</option>
+                <option value="balanced" selected>Сбалансированный · 0.75 Келли</option>
+                <option value="aggressive">Агрессивный · 1.0 Келли</option>
+              </select>
+            </label>
+            <p class="bankroll-note" id="bankroll-note">Фракция рассчитывается по текущему коэффициенту и нашей модели вероятностей.</p>
+            <output class="bankroll-result" id="bankroll-result" for="bankroll-amount bankroll-market risk-profile" aria-live="polite">Выберите событие для расчёта рекомендации.</output>
+          </form>
+        </article>
+      </div>
+    </section>
+
     <section class="combos" id="combos">
       <header class="section-header section-header--compact">
         <div>
@@ -210,6 +281,19 @@
     </div>
   </footer>
 
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsOrganization",
+      "name": "Sportsverse Pulse",
+      "url": "https://sportsversepulse.example/",
+      "description": "Платформа аналитики ставок на спорт с value-линии, лайв-сигналами и калькулятором банка.",
+      "sport": ["Soccer", "Basketball", "IceHockey", "Tennis", "MartialArts", "Esports"],
+      "knowsAbout": ["Sports betting", "Value betting", "Kelly criterion", "Analytics"],
+      "areaServed": "RU",
+      "inLanguage": "ru"
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -13,7 +13,8 @@ const marketsData = [
     loadValue: 325000,
     impact: "Высокий",
     time: "22:00 MSK",
-    movement: [52, 61, 68, 74]
+    movement: [52, 61, 68, 74],
+    modelProbability: 0.64
   },
   {
     id: 2,
@@ -29,7 +30,8 @@ const marketsData = [
     loadValue: 214000,
     impact: "Высокий",
     time: "05:30 MSK",
-    movement: [45, 52, 57, 61]
+    movement: [45, 52, 57, 61],
+    modelProbability: 0.58
   },
   {
     id: 3,
@@ -45,7 +47,8 @@ const marketsData = [
     loadValue: 186000,
     impact: "Средний",
     time: "02:10 MSK",
-    movement: [41, 47, 53, 58]
+    movement: [41, 47, 53, 58],
+    modelProbability: 0.55
   },
   {
     id: 4,
@@ -61,7 +64,8 @@ const marketsData = [
     loadValue: 98000,
     impact: "Средний",
     time: "17:30 MSK",
-    movement: [38, 44, 50, 55]
+    movement: [38, 44, 50, 55],
+    modelProbability: 0.5
   },
   {
     id: 5,
@@ -77,7 +81,8 @@ const marketsData = [
     loadValue: 248000,
     impact: "Экстремальный",
     time: "07:15 MSK",
-    movement: [55, 61, 67, 73]
+    movement: [55, 61, 67, 73],
+    modelProbability: 0.69
   },
   {
     id: 6,
@@ -93,7 +98,8 @@ const marketsData = [
     loadValue: 198000,
     impact: "Высокий",
     time: "14:00 MSK",
-    movement: [49, 55, 62, 67]
+    movement: [49, 55, 62, 67],
+    modelProbability: 0.62
   },
   {
     id: 7,
@@ -109,7 +115,8 @@ const marketsData = [
     loadValue: 156000,
     impact: "Средний",
     time: "19:00 MSK",
-    movement: [44, 49, 56, 63]
+    movement: [44, 49, 56, 63],
+    modelProbability: 0.57
   },
   {
     id: 8,
@@ -125,7 +132,8 @@ const marketsData = [
     loadValue: 142000,
     impact: "Средний",
     time: "21:45 MSK",
-    movement: [39, 45, 51, 57]
+    movement: [39, 45, 51, 57],
+    modelProbability: 0.54
   }
 ];
 
@@ -285,6 +293,10 @@ function renderMarkets() {
     const card = document.createElement("article");
     card.className = "market-card";
     card.role = "listitem";
+    const { edge, expectedReturn } = calculateEdge(item);
+    const edgePercent = edge * 100;
+    const evPercent = expectedReturn * 100;
+    const valueClass = `market-card__ev-value ${edgePercent >= 0 ? "market-card__ev-value--positive" : "market-card__ev-value--negative"}`;
     card.innerHTML = `
       <div class="market-card__header">
         <div>
@@ -308,6 +320,13 @@ function renderMarkets() {
       <div class="market-card__meta">
         Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
       </div>
+      <div class="market-card__ev">
+        <div>
+          <span class="market-card__ev-label">Value-индекс</span>
+          <span class="${valueClass}">${formatPercent(edgePercent, { sign: true, maximumFractionDigits: 1 })}</span>
+        </div>
+        <span class="market-card__ev-note">EV ${formatPercent(evPercent, { sign: true, maximumFractionDigits: 1 })}</span>
+      </div>
       <div class="market-card__trend" aria-hidden="true">
         <span class="market-card__trend-label">Динамика прогруза</span>
         ${renderTrendline(item.movement)}
@@ -322,6 +341,7 @@ function renderMarkets() {
 
   renderSignals(filteredMarkets);
   updateQuickFiltersActiveState();
+  renderOptimizer(filteredMarkets);
 }
 
 function renderAnalytics() {
@@ -553,6 +573,13 @@ function attachEventListeners() {
     localStorage.setItem("tt-theme", isDark ? "light" : "dark");
   });
 
+  const bankrollForm = document.getElementById("bankroll-form");
+  if (bankrollForm) {
+    bankrollForm.addEventListener("submit", event => event.preventDefault());
+    bankrollForm.addEventListener("input", updateBankrollSuggestion);
+    bankrollForm.addEventListener("change", updateBankrollSuggestion);
+  }
+
   document.getElementById("faq-accordion").addEventListener("click", event => {
     if (!event.target.closest(".accordion__trigger")) return;
     const trigger = event.target.closest(".accordion__trigger");
@@ -570,6 +597,78 @@ function formatCurrency(amount) {
     currency: "RUB",
     maximumFractionDigits: 0
   }).format(amount);
+}
+
+function formatPercent(value, { sign = false, maximumFractionDigits = 1 } = {}) {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+  const absolute = Math.abs(value);
+  const formatted = absolute.toLocaleString("ru-RU", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits
+  });
+  if (sign) {
+    if (value > 0) return `+${formatted}%`;
+    if (value < 0) return `-${formatted}%`;
+    return "0%";
+  }
+  return `${value < 0 ? "-" : ""}${formatted}%`;
+}
+
+function impliedProbability(odds) {
+  if (!Number.isFinite(odds) || odds <= 0) {
+    return 0;
+  }
+  return 1 / odds;
+}
+
+function calculateEdge(market) {
+  const modelProbability = Number(market.modelProbability ?? 0);
+  const implied = impliedProbability(market.oddsCurrent);
+  const edge = modelProbability - implied;
+  const expectedReturn = modelProbability * market.oddsCurrent - 1;
+  return { edge, expectedReturn };
+}
+
+function getEnrichedMarkets(source = marketsData) {
+  const dataset = Array.isArray(source) ? source : marketsData;
+  return dataset.map(item => {
+    const { edge, expectedReturn } = calculateEdge(item);
+    return { ...item, edge, expectedReturn };
+  });
+}
+
+function calculateKellyFraction(market) {
+  const b = Number(market.oddsCurrent) - 1;
+  if (!Number.isFinite(b) || b <= 0) {
+    return 0;
+  }
+  const p = Number(market.modelProbability ?? 0);
+  if (!Number.isFinite(p) || p <= 0) {
+    return 0;
+  }
+  const q = 1 - p;
+  const fraction = (b * p - q) / b;
+  return Math.max(0, fraction);
+}
+
+function getRiskMultiplier(profile = "balanced") {
+  switch (profile) {
+    case "conservative":
+      return 0.5;
+    case "aggressive":
+      return 1;
+    default:
+      return 0.75;
+  }
+}
+
+function roundToStep(value, step = 100) {
+  if (!Number.isFinite(value) || !Number.isFinite(step) || step <= 0) {
+    return 0;
+  }
+  return Math.round(value / step) * step;
 }
 
 function normalizeSparkline(values) {
@@ -655,25 +754,20 @@ function renderHeroStats() {
   const container = document.getElementById("hero-stats");
   if (!container) return;
 
-  const totalMarkets = marketsData.length;
+  const enrichedMarkets = getEnrichedMarkets();
+  const totalMarkets = enrichedMarkets.length;
   if (!totalMarkets) {
     container.innerHTML = "";
     return;
   }
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
-  );
-  const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
-
+  const averageLoad = Math.round(enrichedMarkets.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets);
+  const valueMarkets = enrichedMarkets.filter(item => item.edge > 0);
+  const topEv = enrichedMarkets.reduce((acc, item) => (item.expectedReturn > acc.expectedReturn ? item : acc), enrichedMarkets[0]);
   const stats = [
     { label: "Прогнозов в ленте", value: totalMarkets },
+    { label: "Value-линий", value: `${valueMarkets.length}/${totalMarkets}` },
     { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
+    { label: "Макс. EV", value: formatPercent(topEv.expectedReturn * 100, { sign: true, maximumFractionDigits: 1 }) }
   ];
 
   container.innerHTML = stats
@@ -730,14 +824,20 @@ function renderInsights() {
     return;
   }
 
-  const busiestMarket = marketsData.reduce((acc, item) => (item.loadPercent > acc.loadPercent ? item : acc), marketsData[0]);
-  const sharpestMove = marketsData
+  const enriched = getEnrichedMarkets();
+  const busiestMarket = enriched.reduce((acc, item) => (item.loadPercent > acc.loadPercent ? item : acc), enriched[0]);
+  const sharpestMove = enriched
     .map(item => ({ ...item, delta: Math.abs(item.oddsCurrent - item.oddsStart) }))
     .sort((a, b) => b.delta - a.delta)[0];
-  const heaviestVolume = marketsData.reduce((acc, item) => (item.loadValue > acc.loadValue ? item : acc), marketsData[0]);
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / marketsData.length
-  );
+  const heaviestVolume = enriched.reduce((acc, item) => (item.loadValue > acc.loadValue ? item : acc), enriched[0]);
+  const averageLoad = Math.round(enriched.reduce((sum, item) => sum + item.loadPercent, 0) / enriched.length);
+  const valueMarkets = enriched.filter(item => item.edge > 0);
+  const topValue = valueMarkets.length
+    ? valueMarkets.sort((a, b) => b.edge - a.edge)[0]
+    : enriched[0];
+  const averageEv = valueMarkets.length
+    ? valueMarkets.reduce((sum, item) => sum + item.expectedReturn, 0) / valueMarkets.length
+    : 0;
 
   const cards = [
     {
@@ -757,6 +857,12 @@ function renderInsights() {
       value: `${formatCurrency(heaviestVolume.loadValue)}`,
       caption: `${heaviestVolume.match}`,
       detail: `${heaviestVolume.tournament}`
+    },
+    {
+      title: "Value-индекс",
+      value: valueMarkets.length ? formatPercent(topValue.edge * 100, { sign: true, maximumFractionDigits: 1 }) : "—",
+      caption: valueMarkets.length ? `${topValue.match}` : "Ожидаем новые value-сценарии",
+      detail: `Value-линий ${valueMarkets.length}/${enriched.length}`
     }
   ];
 
@@ -774,11 +880,84 @@ function renderInsights() {
     .join("");
 
   if (meta) {
-    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · ${new Date().toLocaleTimeString("ru-RU", {
+    meta.textContent = `Отслеживаем ${enriched.length} событий · средний прогруз ${averageLoad}% · value-линий ${valueMarkets.length}/${
+      enriched.length
+    } · средний EV ${formatPercent(averageEv * 100, { maximumFractionDigits: 1 })} · ${new Date().toLocaleTimeString("ru-RU", {
       hour: "2-digit",
       minute: "2-digit"
     })}`;
   }
+}
+
+function renderOptimizer(source = marketsData) {
+  const tableBody = document.getElementById("value-table");
+  const meta = document.getElementById("value-meta");
+  const marketSelect = document.getElementById("bankroll-market");
+  if (!tableBody) return;
+
+  const dataset = Array.isArray(source) && source.length ? source : marketsData;
+  const enriched = getEnrichedMarkets(dataset).sort((a, b) => b.edge - a.edge);
+
+  if (!enriched.length) {
+    tableBody.innerHTML = `<tr><td colspan="4" class="value-table__empty">Нет линий для анализа</td></tr>`;
+    if (meta) {
+      meta.textContent = "Нет активных событий";
+    }
+    if (marketSelect) {
+      marketSelect.innerHTML = "";
+    }
+    updateBankrollSuggestion();
+    return;
+  }
+
+  tableBody.innerHTML = enriched
+    .slice(0, 4)
+    .map(item => `
+      <tr>
+        <td>
+          <div class="value-table__title">
+            <strong>${item.match}</strong>
+            <span class="value-table__meta">${item.sport} · ${item.tournament}</span>
+          </div>
+        </td>
+        <td>${item.oddsCurrent.toFixed(2)}</td>
+        <td>
+          <span class="value-chip${item.edge >= 0 ? "" : " value-chip--negative"}">
+            ${formatPercent(item.edge * 100, { sign: true, maximumFractionDigits: 1 })}
+          </span>
+        </td>
+        <td>${formatPercent(item.expectedReturn * 100, { sign: true, maximumFractionDigits: 1 })}</td>
+      </tr>
+    `)
+    .join("");
+
+  const positive = enriched.filter(item => item.edge > 0);
+  const averageEv = positive.length
+    ? positive.reduce((sum, item) => sum + item.expectedReturn, 0) / positive.length
+    : 0;
+
+  if (meta) {
+    meta.textContent = `Value-линий ${positive.length}/${enriched.length} · средний EV ${formatPercent(averageEv * 100, {
+      maximumFractionDigits: 1
+    })}`;
+  }
+
+  if (marketSelect) {
+    const previousValue = marketSelect.value;
+    const fullEnriched = getEnrichedMarkets();
+    marketSelect.innerHTML = fullEnriched
+      .map(item => `<option value="${item.id}">${item.match} · ${item.marketLabel} (${item.oddsCurrent.toFixed(2)})</option>`)
+      .join("");
+
+    if (previousValue && fullEnriched.some(item => String(item.id) === previousValue)) {
+      marketSelect.value = previousValue;
+    } else if (fullEnriched.length) {
+      const fallback = fullEnriched.find(item => item.edge > 0) || fullEnriched[0];
+      marketSelect.value = String(fallback.id);
+    }
+  }
+
+  updateBankrollSuggestion();
 }
 
 function renderCombos() {
@@ -882,4 +1061,66 @@ function copyTextFallback(text) {
     console.error("Не удалось скопировать экспресс", error);
   }
   textarea.remove();
+}
+
+function updateBankrollSuggestion() {
+  const result = document.getElementById("bankroll-result");
+  if (!result) return;
+  const bankrollInput = document.getElementById("bankroll-amount");
+  const marketSelect = document.getElementById("bankroll-market");
+  const riskSelect = document.getElementById("risk-profile");
+  const note = document.getElementById("bankroll-note");
+
+  const bankroll = Number(bankrollInput?.value || 0);
+  const selectedId = marketSelect?.value;
+  const selectedMarket = marketsData.find(item => String(item.id) === selectedId);
+
+  if (!bankroll || bankroll <= 0 || !selectedMarket) {
+    result.textContent = "Введите банк и выберите событие для расчёта рекомендации.";
+    if (note) {
+      note.textContent = "Фракция рассчитывается по текущему коэффициенту и нашей модели вероятностей.";
+    }
+    return;
+  }
+
+  const { edge, expectedReturn } = calculateEdge(selectedMarket);
+  const kellyFraction = calculateKellyFraction(selectedMarket);
+  const riskMultiplier = getRiskMultiplier(riskSelect?.value);
+  const adjustedFraction = kellyFraction * riskMultiplier;
+
+  if (edge <= 0 || adjustedFraction <= 0) {
+    result.textContent = `По выбранной линии нет value — ставка не рекомендована.`;
+    if (note) {
+      note.textContent = `Value ${formatPercent(edge * 100, { sign: true, maximumFractionDigits: 1 })}, базовая фракция Келли ${formatPercent(
+        kellyFraction * 100,
+        { maximumFractionDigits: 1 }
+      )}.`;
+    }
+    return;
+  }
+
+  const stake = Math.max(0, roundToStep(bankroll * adjustedFraction, 100));
+
+  if (!stake) {
+    result.textContent = "Value подтверждена, но размер банка слишком мал для ставки.";
+    if (note) {
+      note.textContent = `Базовая фракция Келли ${formatPercent(kellyFraction * 100, { maximumFractionDigits: 1 })}.`;
+    }
+    return;
+  }
+
+  const valueText = formatPercent(edge * 100, { sign: true, maximumFractionDigits: 1 });
+  const evText = formatPercent(expectedReturn * 100, { sign: true, maximumFractionDigits: 1 });
+  const fractionText = formatPercent(adjustedFraction * 100, { maximumFractionDigits: 1 });
+
+  result.innerHTML = `
+    <strong>${formatCurrency(stake)}</strong>
+    <div class="bankroll-result__meta">
+      Value ${valueText} · EV ${evText} · Фракция ${fractionText}
+    </div>
+  `;
+
+  if (note) {
+    note.textContent = `Базовая фракция Келли ${formatPercent(kellyFraction * 100, { maximumFractionDigits: 1 })}, выбранный профиль умножает её на ${riskMultiplier}.`;
+  }
 }
