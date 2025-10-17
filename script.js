@@ -1,1110 +1,313 @@
-const marketsData = [
+const heroStats = [
+  { value: "1,5 сек", label: "Средняя задержка в ультрарежиме" },
+  { value: "18 400+", label: "Трансляций в каталоге VelocityCast" },
+  { value: "4K HDR", label: "Максимальное качество потока" },
+  { value: "12 устройств", label: "Поддерживаемых платформ и плееров" }
+];
+
+const tickerEvents = [
+  { tag: "LIVE", text: "Финал КХЛ · режим без задержки подключён" },
+  { tag: "NEW", text: "Формула 1 · доступна телеметрия болидов в реальном времени" },
+  { tag: "BOOST", text: "НБА · мультиэкран с 4 углами камеры и чат-комментарием" }
+];
+
+const features = [
   {
-    id: 1,
+    icon: "⚡",
+    title: "Ультраскоростной поток",
+    description:
+      "Смотреть спорт с задержкой до 1,5 секунды благодаря WebRTC и CDN-узлам, расположенным в 36 городах."
+  },
+  {
+    icon: "🎥",
+    title: "Персональный режиссёр",
+    description:
+      "Создавайте собственные ракурсы, добавляйте графику и делитесь приватными ссылками с друзьями."
+  },
+  {
+    icon: "📱",
+    title: "Синхронизация с беттингом",
+    description:
+      "Интеграция с фэнтези-лигами и букмекерскими приложениями: обновления коэффициентов без переключения окна."
+  },
+  {
+    icon: "🤖",
+    title: "Умные подсказки",
+    description:
+      "Алгоритмы подсказывают ключевые моменты, возможные VR-повторы и автоматически собирают хайлайты."
+  }
+];
+
+const schedule = [
+  {
     sport: "Футбол",
-    tournament: "Лига чемпионов УЕФА",
-    stage: "1/2 финала",
-    match: "Манчестер Сити — Реал Мадрид",
-    market: "match_winner",
-    marketLabel: "Победа Манчестер Сити",
-    loadPercent: 74,
-    oddsStart: 1.95,
-    oddsCurrent: 1.68,
-    loadValue: 325000,
-    impact: "Высокий",
-    time: "22:00 MSK",
-    movement: [52, 61, 68, 74]
+    league: "Лига чемпионов",
+    title: "Манчестер Сити — Бавария",
+    start: "22:00",
+    mode: "ultra",
+    quality: "4K HDR",
+    description: "Ультраскоростная трансляция с аналитикой xG и 6 камерами.",
+    extras: ["Синхронизация с Fantasy League", "Интерактивные комментарии"]
   },
   {
-    id: 2,
-    sport: "Баскетбол",
-    tournament: "NBA Плей-офф",
-    stage: "Матч 5",
-    match: "Лос-Анджелес Лейкерс — Голден Стэйт Уорриорз",
-    market: "total_goals",
-    marketLabel: "Тотал очков больше 223.5",
-    loadPercent: 61,
-    oddsStart: 1.92,
-    oddsCurrent: 1.81,
-    loadValue: 214000,
-    impact: "Высокий",
-    time: "05:30 MSK",
-    movement: [45, 52, 57, 61]
-  },
-  {
-    id: 3,
     sport: "Хоккей",
-    tournament: "NHL",
-    stage: "Регулярный сезон",
-    match: "Торонто Мэйпл Лифс — Бостон Брюинз",
-    market: "handicap",
-    marketLabel: "Фора (-1.5) Торонто",
-    loadPercent: 58,
-    oddsStart: 2.15,
-    oddsCurrent: 1.94,
-    loadValue: 186000,
-    impact: "Средний",
-    time: "02:10 MSK",
-    movement: [41, 47, 53, 58]
+    league: "КХЛ Финал",
+    title: "Ак Барс — СКА",
+    start: "19:30",
+    mode: "multiview",
+    quality: "1440p",
+    description: "Мультиэкран с bench-камерой и телеметрией скорости бросков.",
+    extras: ["Графика силы броска", "Студийный чат"]
   },
   {
-    id: 4,
-    sport: "Теннис",
-    tournament: "ATP Masters Рим",
-    stage: "Полуфинал",
-    match: "Новак Джокович — Карлос Алькарас",
-    market: "total_goals",
-    marketLabel: "Тотал сетов больше 2.5",
-    loadPercent: 55,
-    oddsStart: 2.25,
-    oddsCurrent: 2.02,
-    loadValue: 98000,
-    impact: "Средний",
-    time: "17:30 MSK",
-    movement: [38, 44, 50, 55]
-  },
-  {
-    id: 5,
-    sport: "Единоборства",
-    tournament: "UFC 300",
-    stage: "Главный бой",
-    match: "Ислам Махачев — Чарльз Оливейра",
-    market: "match_winner",
-    marketLabel: "Победа Ислам Махачев",
-    loadPercent: 73,
-    oddsStart: 1.85,
-    oddsCurrent: 1.64,
-    loadValue: 248000,
-    impact: "Экстремальный",
-    time: "07:15 MSK",
-    movement: [55, 61, 67, 73]
-  },
-  {
-    id: 6,
-    sport: "Киберспорт",
-    tournament: "The International",
-    stage: "Гранд-финал",
-    match: "Team Spirit — Gaimin Gladiators",
-    market: "match_winner",
-    marketLabel: "Победа Team Spirit",
-    loadPercent: 67,
-    oddsStart: 2.10,
-    oddsCurrent: 1.88,
-    loadValue: 198000,
-    impact: "Высокий",
-    time: "14:00 MSK",
-    movement: [49, 55, 62, 67]
-  },
-  {
-    id: 7,
-    sport: "Футбол",
-    tournament: "Мир РПЛ",
-    stage: "Тур 26",
-    match: "Зенит — ЦСКА",
-    market: "both_score",
-    marketLabel: "Обе забьют — Да",
-    loadPercent: 63,
-    oddsStart: 1.95,
-    oddsCurrent: 1.82,
-    loadValue: 156000,
-    impact: "Средний",
-    time: "19:00 MSK",
-    movement: [44, 49, 56, 63]
-  },
-  {
-    id: 8,
     sport: "Баскетбол",
-    tournament: "Евролига",
-    stage: "Финал четырёх",
-    match: "Фенербахче — Олимпиакос",
-    market: "handicap",
-    marketLabel: "Фора (+4.5) Олимпиакос",
-    loadPercent: 57,
-    oddsStart: 1.98,
-    oddsCurrent: 1.86,
-    loadValue: 142000,
-    impact: "Средний",
-    time: "21:45 MSK",
-    movement: [39, 45, 51, 57]
+    league: "NBA",
+    title: "Лейкерс — Уорриорз",
+    start: "05:00",
+    mode: "ultra",
+    quality: "1080p/120",
+    description: "Ускоренный поток с данными Second Spectrum и AR-повторами.",
+    extras: ["Статистика в реальном времени", "Виртуальные ракурсы"]
+  },
+  {
+    sport: "Автоспорт",
+    league: "Формула 1",
+    title: "Гран-при Монцы",
+    start: "16:00",
+    mode: "mobile",
+    quality: "720p",
+    description: "Лёгкий поток для путешествий с телеметрией DRS и картой трассы.",
+    extras: ["Push-уведомления", "Режим экономии трафика"]
+  },
+  {
+    sport: "Киберспорт",
+    league: "The International",
+    title: "Team Spirit — Gaimin Gladiators",
+    start: "14:00",
+    mode: "multiview",
+    quality: "1080p",
+    description: "Четыре POV потока и статистика драфта в реальном времени.",
+    extras: ["Интерактивные пики", "Голосовой чат"]
+  },
+  {
+    sport: "Теннис",
+    league: "ATP Masters",
+    title: "Джокович — Алькарас",
+    start: "18:30",
+    mode: "ultra",
+    quality: "4K",
+    description: "Режим PointCast с графикой траекторий и мгновенными повторами.",
+    extras: ["Аналитика розыгрышей", "Сохранение клипов"]
   }
 ];
 
-const stableTournaments = [
-  { name: "Лига чемпионов УЕФА", stability: "+7.8% ROI", matches: 48 },
-  { name: "NBA Плей-офф", stability: "+6.4% ROI", matches: 36 },
-  { name: "NHL регулярный сезон", stability: "+5.2% ROI", matches: 41 }
-];
-
-const forecasts = [
-  { market: "Сити — победа", delta: "-0.11", confidence: 89 },
-  { market: "Лейкерс vs Уорриорз тотал 223.5", delta: "-0.07", confidence: 76 },
-  { market: "Махачев — победа", delta: "-0.08", confidence: 92 }
-];
-
-const parlayIdeas = [
+const technologies = [
   {
-    id: "combo-1",
-    title: "Вечерний фаворит",
-    risk: "Сбалансированный",
-    confidence: 82,
-    totalOdds: 3.84,
-    edge: "+7% EV",
-    legs: [
-      { match: marketsData[0].match, pick: marketsData[0].marketLabel, sport: marketsData[0].sport },
-      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport }
-    ],
-    comment: "Сочетание топовых линий из футбола и тенниса для вечернего прайм-тайма."
+    label: "Edge CDN",
+    title: "36 узлов доставки",
+    description:
+      "Распределённая сеть по Европе и Азии сокращает путь сигнала и стабилизирует поток даже в часы пиковой нагрузки."
   },
   {
-    id: "combo-2",
-    title: "Ночная очередь",
-    risk: "Агрессивный",
-    confidence: 76,
-    totalOdds: 4.62,
-    edge: "+11% EV",
-    legs: [
-      { match: marketsData[1].match, pick: marketsData[1].marketLabel, sport: marketsData[1].sport },
-      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport },
-      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport }
-    ],
-    comment: "Риски выше нормы, зато покрываем NBA, NHL и киберспорт в одной связке."
+    label: "Adaptive Bitrate",
+    title: "До 12 профилей качества",
+    description:
+      "Алгоритм автоматически подбирает оптимальное разрешение и частоту кадров, не обрывая трансляцию."
   },
   {
-    id: "combo-3",
-    title: "Выходной экспресс",
-    risk: "Консервативный",
-    confidence: 88,
-    totalOdds: 2.91,
-    edge: "+5% EV",
-    legs: [
-      { match: marketsData[6].match, pick: marketsData[6].marketLabel, sport: marketsData[6].sport },
-      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport }
-    ],
-    comment: "Подборка с упором на стабильные чемпионаты и умеренную волатильность."
+    label: "Predictive Replay",
+    title: "Повторы за 3 секунды",
+    description:
+      "Модель машинного обучения заранее отмечает потенциально ключевые моменты и готовит клипы к публикации."
+  },
+  {
+    label: "Sync API",
+    title: "Интеграции и виджеты",
+    description:
+      "API открывает события, таймкоды и телеметрию для медиацентров, баров и сторонних приложений."
   }
-];
-
-const betSlipState = {
-  selections: [],
-  stake: 1000,
-  currency: "₽"
-};
-
-const comboFeedbackTimers = new Map();
-
-let liveFeedEvents = [
-  createFeedEvent({
-    minutesAgo: 4,
-    type: "alert",
-    context: `${marketsData[0].tournament} · ${marketsData[0].sport}`,
-    title: marketsData[0].match,
-    description: `Прогруз на ${marketsData[0].marketLabel.toLowerCase()} усилился — коэффициент упал до ${marketsData[0].oddsCurrent.toFixed(2)} при ${marketsData[0].loadPercent}% объёма.`
-  }),
-  createFeedEvent({
-    minutesAgo: 8,
-    type: "trend",
-    context: `${marketsData[1].tournament} · ${marketsData[1].sport}`,
-    title: marketsData[1].match,
-    description: `Ставки на ${marketsData[1].marketLabel.toLowerCase()} растут: вероятность пробития увеличилась, текущий коэффициент ${marketsData[1].oddsCurrent.toFixed(2)}.`
-  }),
-  createFeedEvent({
-    minutesAgo: 12,
-    type: "live",
-    context: `${marketsData[5].tournament} · ${marketsData[5].sport}`,
-    title: marketsData[5].match,
-    description: `Team Spirit получает поддержку сообщества: ${marketsData[5].loadPercent}% ставок и объём ${formatCurrency(marketsData[5].loadValue)}.`
-  }),
-  createFeedEvent({
-    minutesAgo: 16,
-    type: "trend",
-    context: `${marketsData[6].tournament} · ${marketsData[6].sport}`,
-    title: marketsData[6].match,
-    description: `Игроки ждут обмен голами: ${marketsData[6].marketLabel} держится на ${marketsData[6].loadPercent}% прогруза.`
-  })
 ];
 
 const state = {
-  theme: localStorage.getItem("tt-theme") || "dark",
-  lastUpdate: Date.now(),
-  refreshIntervalId: null,
-  relativeIntervalId: null
+  theme: localStorage.getItem("velocity-theme") || "dark",
+  lastUpdated: Date.now()
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.setAttribute("data-theme", state.theme);
-  document.getElementById("toggle-theme").textContent =
-    state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
+  const toggleThemeBtn = document.getElementById("toggle-theme");
+  toggleThemeBtn.textContent = state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
 
   renderHeroStats();
-  renderQuickFilters();
+  renderTicker();
+  renderFeatures();
   renderFilters();
-  renderMarkets();
-  renderAnalytics();
-  renderInsights();
-  renderCombos();
-  renderLiveFeed();
-  renderBetSlip();
-  markUpdated();
-  scheduleAutoRefresh();
-  attachEventListeners();
-});
-
-function renderFilters() {
-  const sportSelect = document.getElementById("sport-filter");
-  const tournamentSelect = document.getElementById("tournament-filter");
-  const sports = ["all", ...new Set(marketsData.map(item => item.sport))];
-  const tournaments = ["all", ...new Set(marketsData.map(item => item.tournament))];
-
-  clearAdditionalOptions(sportSelect);
-  clearAdditionalOptions(tournamentSelect);
-
-  sports.forEach(sport => {
-    if (sport === "all") return;
-    const option = document.createElement("option");
-    option.value = sport;
-    option.textContent = sport;
-    sportSelect.append(option);
-  });
-
-  tournaments.forEach(tournament => {
-    if (tournament === "all") return;
-    const option = document.createElement("option");
-    option.value = tournament;
-    option.textContent = tournament;
-    tournamentSelect.append(option);
-  });
-}
-
-function renderMarkets() {
-  const grid = document.getElementById("markets-grid");
-  const sportFilter = document.getElementById("sport-filter").value;
-  const tournamentFilter = document.getElementById("tournament-filter").value;
-  const marketFilter = document.getElementById("market-filter").value;
-
-  grid.innerHTML = "";
-
-  const filteredMarkets = marketsData
-    .filter(item => (sportFilter === "all" || item.sport === sportFilter))
-    .filter(item => (tournamentFilter === "all" || item.tournament === tournamentFilter))
-    .filter(item => (marketFilter === "all" || item.market === marketFilter));
-
-  filteredMarkets.forEach(item => {
-    const card = document.createElement("article");
-    card.className = "market-card";
-    card.role = "listitem";
-    card.innerHTML = `
-      <div class="market-card__header">
-        <div>
-          <h3>${item.match}</h3>
-          <div class="market-card__meta">${item.sport} · ${item.tournament} · ${item.stage}</div>
-        </div>
-        <span class="impact">${item.impact}</span>
-      </div>
-      <div class="progress">
-        <div class="progress__label">
-          <span>${item.marketLabel}</span>
-          <span>${item.loadPercent}%</span>
-        </div>
-        <div class="progress__bar">
-          <span class="progress__fill" style="transform: scaleX(${item.loadPercent / 100})"></span>
-        </div>
-      </div>
-      <div class="market-card__meta">
-        Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Старт в ${item.time}
-      </div>
-      <div class="market-card__meta">
-        Коэффициенты: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
-      </div>
-      <div class="market-card__actions" role="group" aria-label="Действия со ставкой">
-        <span class="market-card__odds">Текущий коэфф. ${item.oddsCurrent.toFixed(2)}</span>
-        <button class="btn btn--secondary" type="button" data-action="add-to-slip" data-market-id="${item.id}">В купон</button>
-      </div>
-      <div class="market-card__trend" aria-hidden="true">
-        <span class="market-card__trend-label">Динамика прогруза</span>
-        ${renderTrendline(item.movement)}
-      </div>
-    `;
-    grid.append(card);
-  });
-
-  if (!filteredMarkets.length) {
-    grid.innerHTML = `<div class="empty-state">Нет прогнозов по выбранным фильтрам</div>`;
-  }
-
-  renderSignals(filteredMarkets);
-  updateQuickFiltersActiveState();
-}
-
-function renderBetSlip() {
-  const list = document.getElementById("betslip-list");
-  const stakeInput = document.getElementById("stake-input");
-  if (!list || !stakeInput) return;
-
-  betSlipState.selections = betSlipState.selections
-    .map(selection => {
-      const snapshot = getMarketSnapshot(selection.id);
-      return snapshot ? { ...selection, ...snapshot } : null;
-    })
-    .filter(Boolean);
-
-  list.innerHTML = "";
-
-  if (!betSlipState.selections.length) {
-    list.innerHTML = `<div class="betslip__empty">Выберите исход в линии, чтобы добавить его в купон ставок.</div>`;
-  } else {
-    betSlipState.selections.forEach(selection => {
-      const item = document.createElement("article");
-      item.className = "betslip__item";
-      item.dataset.selectionId = String(selection.id);
-      const kickoff = selection.time ? `Старт ${selection.time}` : "Время уточняется";
-      item.innerHTML = `
-        <header>
-          <div class="betslip__event">
-            <span class="betslip__match">${selection.match}</span>
-            <span class="betslip__meta-line">${selection.sport} · ${selection.tournament}</span>
-          </div>
-          <button class="betslip__remove" type="button" aria-label="Удалить исход" data-action="remove-selection" data-selection-id="${selection.id}">×</button>
-        </header>
-        <div class="betslip__pick">
-          <span>${selection.marketLabel}</span>
-          <span class="betslip__odds">${selection.odds.toFixed(2)}</span>
-        </div>
-        <footer class="betslip__footnote">${kickoff}</footer>
-      `;
-      list.append(item);
-    });
-  }
-
-  stakeInput.value = betSlipState.stake > 0 ? betSlipState.stake : 0;
-  updateBetSlipSummary();
-}
-
-function addSelectionToBetSlip(marketId) {
-  const snapshot = getMarketSnapshot(Number(marketId));
-  if (!snapshot) return;
-
-  const existingIndex = betSlipState.selections.findIndex(selection => selection.id === snapshot.id);
-  if (existingIndex >= 0) {
-    betSlipState.selections[existingIndex] = { ...betSlipState.selections[existingIndex], ...snapshot };
-    renderBetSlip();
-    requestAnimationFrame(() => flashExistingSelection(snapshot.id));
-    setBetSlipFeedback("Исход уже в купоне: коэффициент обновлён.");
-    return;
-  }
-
-  betSlipState.selections.push(snapshot);
-  renderBetSlip();
-  requestAnimationFrame(() => flashExistingSelection(snapshot.id));
-  setBetSlipFeedback(`Добавлено «${snapshot.marketLabel}».`);
-}
-
-function removeSelectionFromBetSlip(selectionId) {
-  const initialLength = betSlipState.selections.length;
-  betSlipState.selections = betSlipState.selections.filter(selection => selection.id !== Number(selectionId));
-  if (betSlipState.selections.length === initialLength) {
-    setBetSlipFeedback("Исход уже удалён.", "negative");
-    return;
-  }
-  renderBetSlip();
-  setBetSlipFeedback("Исход удалён из купона.");
-}
-
-function handleStakeChange(event) {
-  const raw = Number(event.target.value);
-  const sanitized = Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : betSlipState.stake;
-  betSlipState.stake = sanitized;
-  event.target.value = betSlipState.stake;
-  updateBetSlipSummary();
-}
-
-function handlePlaceBet() {
-  if (!betSlipState.selections.length) {
-    setBetSlipFeedback("Добавьте хотя бы одно событие в купон.", "negative");
-    return;
-  }
-
-  if (betSlipState.stake < 50) {
-    setBetSlipFeedback("Минимальная сумма ставки — 50 ₽.", "negative");
-    flashStakeInput();
-    return;
-  }
-
-  const potential = Math.round(betSlipState.stake * calculateCombinedOdds());
-  setBetSlipFeedback(`Купон отправлен на расчёт: потенциальный выигрыш ${formatCurrency(potential)}.`);
-}
-
-function updateBetSlipSummary() {
-  const counter = document.getElementById("betslip-counter");
-  const oddsElement = document.getElementById("betslip-odds");
-  const payoutElement = document.getElementById("betslip-payout");
-  const placeButton = document.getElementById("place-bet");
-
-  const count = betSlipState.selections.length;
-  const odds = calculateCombinedOdds();
-  const potential = count && betSlipState.stake ? Math.round(betSlipState.stake * odds) : 0;
-
-  if (counter) {
-    counter.textContent = formatSelectionCount(count);
-  }
-
-  if (oddsElement) {
-    oddsElement.textContent = count ? odds.toFixed(2) : "1.00";
-  }
-
-  if (payoutElement) {
-    payoutElement.textContent = formatCurrency(potential);
-  }
-
-  if (placeButton) {
-    placeButton.disabled = !count || betSlipState.stake < 50;
-  }
-}
-
-function calculateCombinedOdds() {
-  if (!betSlipState.selections.length) {
-    return 1;
-  }
-  return betSlipState.selections.reduce((product, selection) => product * selection.odds, 1);
-}
-
-function flashExistingSelection(selectionId) {
-  const list = document.getElementById("betslip-list");
-  if (!list) return;
-  const item = list.querySelector(`[data-selection-id="${selectionId}"]`);
-  if (!item) return;
-  item.classList.add("betslip__item--highlight");
-  setTimeout(() => {
-    item.classList.remove("betslip__item--highlight");
-  }, 1400);
-}
-
-function flashStakeInput() {
-  const wrapper = document.querySelector(".betslip__stake-input");
-  if (!wrapper) return;
-  wrapper.classList.add("betslip__stake-input--warning");
-  setTimeout(() => wrapper.classList.remove("betslip__stake-input--warning"), 1600);
-}
-
-function setBetSlipFeedback(message, tone = "info") {
-  const feedback = document.getElementById("betslip-feedback");
-  if (!feedback) return;
-  feedback.textContent = message;
-  feedback.classList.toggle("betslip__feedback--negative", tone === "negative");
-}
-
-function getMarketSnapshot(marketId) {
-  const market = marketsData.find(item => item.id === marketId);
-  if (!market) return null;
-  return {
-    id: market.id,
-    match: market.match,
-    sport: market.sport,
-    tournament: market.tournament,
-    marketLabel: market.marketLabel,
-    odds: market.oddsCurrent,
-    time: market.time
-  };
-}
-
-function formatSelectionCount(count) {
-  if (!count) {
-    return "0 событий";
-  }
-  const form = declOfNum(count, ["событие", "события", "событий"]);
-  return `${count} ${form}`;
-}
-
-function declOfNum(number, titles) {
-  const cases = [2, 0, 1, 1, 1, 2];
-  return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]];
-}
-
-function renderAnalytics() {
-  const totalVolume = marketsData.reduce((sum, item) => sum + item.loadValue, 0);
-  document.getElementById("total-volume").textContent = formatCurrency(totalVolume);
-
-  const sparkline = document.getElementById("sparkline");
-  sparkline.innerHTML = "";
-  const sparkPoints = normalizeSparkline(marketsData.map(item => item.loadPercent));
-  sparkPoints.forEach(point => {
-    const bar = document.createElement("span");
-    bar.style.height = `${point}%`;
-    sparkline.append(bar);
-  });
-
-  const tournamentsList = document.getElementById("top-officials");
-  tournamentsList.innerHTML = "";
-  stableTournaments.forEach(tournament => {
-    const li = document.createElement("li");
-    li.innerHTML = `<span>${tournament.name}</span><span>${tournament.stability} · ${tournament.matches} матчей</span>`;
-    tournamentsList.append(li);
-  });
-
-  const forecastList = document.getElementById("forecast");
-  forecastList.innerHTML = "";
-  forecasts.forEach(item => {
-    const li = document.createElement("li");
-    li.innerHTML = `<span>${item.market}</span><span>${item.delta} (уверенность ${item.confidence}%)</span>`;
-    forecastList.append(li);
-  });
-}
-
-function renderSignals(source = marketsData) {
-  const signalList = document.getElementById("signal-list");
-  if (!signalList) return;
-
-  signalList.innerHTML = "";
-
-  const candidates = [...source]
-    .sort((a, b) => {
-      if (b.loadPercent === a.loadPercent) {
-        return b.loadValue - a.loadValue;
-      }
-      return b.loadPercent - a.loadPercent;
-    })
-    .slice(0, 3);
-
-  if (!candidates.length) {
-    const empty = document.createElement("li");
-    empty.className = "live-card__item live-card__item--empty";
-    empty.textContent = "Нет сигналов по текущим фильтрам";
-    signalList.append(empty);
-    return;
-  }
-
-  candidates.forEach(item => {
-    const li = document.createElement("li");
-    li.className = "live-card__item";
-    const oddsFell = item.oddsCurrent < item.oddsStart;
-    const trendClass = `trend ${oddsFell ? "trend--down" : "trend--up"}`;
-    const arrow = oddsFell ? "↓" : "↑";
-    const delta = Math.abs(item.oddsCurrent - item.oddsStart).toFixed(2);
-    li.innerHTML = `
-      <strong>${item.match}</strong>
-      <div class="live-card__meta">
-        <span>${item.tournament} · ${item.sport}</span>
-        <span class="${trendClass}">${arrow} ${item.oddsCurrent.toFixed(2)}</span>
-      </div>
-      <div class="live-card__meta">
-        <span>Прогруз ${item.loadPercent}%</span>
-        <span>Δ ${oddsFell ? "-" : "+"}${delta}</span>
-      </div>
-    `;
-    signalList.append(li);
-  });
-}
-
-function renderLiveFeed() {
-  const feed = document.getElementById("live-feed");
-  if (!feed) return;
-
-  feed.innerHTML = "";
-
-  if (!liveFeedEvents.length) {
-    const empty = document.createElement("li");
-    empty.className = "live-feed__item";
-    empty.innerHTML = `
-      <div class="live-feed__title">Лента пуста</div>
-      <div class="live-feed__text">Ожидаем новые события перед стартом матчей.</div>
-    `;
-    feed.append(empty);
-    return;
-  }
-
-  liveFeedEvents.slice(0, 6).forEach(event => {
-    const li = document.createElement("li");
-    li.className = "live-feed__item";
-    const badgeClass = `live-feed__badge${event.type === "alert" ? " live-feed__badge--alert" : ""}`;
-    const badgeLabels = { alert: "АЛЕРТ", trend: "ТРЕНД", live: "LIVE" };
-    const badgeLabel = badgeLabels[event.type] || event.type.toUpperCase();
-    const timestamp = new Date(event.timestamp);
-    li.innerHTML = `
-      <header>
-        <span>${formatClock(timestamp)}</span>
-        <span class="${badgeClass}">${badgeLabel}</span>
-      </header>
-      <div class="live-feed__title">${event.title}</div>
-      <div class="live-feed__text">${event.description}</div>
-      <div class="live-card__meta">
-        <span>${event.context}</span>
-        <span>${formatRelativeTime(timestamp)}</span>
-      </div>
-    `;
-    feed.append(li);
-  });
-}
-
-function refreshLiveData(source = "auto") {
-  const market = pickRandom(marketsData);
-  if (!market) return;
-
-  const previousOdds = market.oddsCurrent;
-  const oddsShift = (Math.random() * 0.05 + 0.01) * (Math.random() > 0.5 ? -1 : 1);
-  const nextOdds = clampOdds(market.oddsCurrent * (1 + oddsShift));
-  market.oddsCurrent = Number(nextOdds.toFixed(2));
-
-  const loadShift = Math.round((Math.random() * 5 + 2) * (oddsShift < 0 ? 1 : -1));
-  market.loadPercent = clampPercent(market.loadPercent + loadShift);
-  const volumeMultiplier = loadShift > 0 ? 1 + Math.random() * 0.05 : 1 + Math.random() * 0.03;
-  market.loadValue = Math.max(50000, Math.round(market.loadValue * volumeMultiplier));
-
-  market.movement.push(market.loadPercent);
-  market.movement = market.movement.slice(-4);
-
-  const oddsDifference = Math.abs(market.oddsCurrent - previousOdds).toFixed(2);
-  const oddsFell = market.oddsCurrent < previousOdds;
-  const eventType = source === "manual" ? "live" : oddsFell ? "alert" : "trend";
-  const description = `Ставка ${market.marketLabel.toLowerCase()} ${oddsFell ? "получила дополнительный прогруз" : "испытывает коррекцию"}: коэффициент ${oddsFell ? "опустился" : "поднялся"} до ${market.oddsCurrent.toFixed(2)} (Δ ${oddsDifference}). Объём ${formatCurrency(market.loadValue)} при ${market.loadPercent}% ставок.`;
-
-  liveFeedEvents.unshift({
-    id: `event-${Date.now()}`,
-    timestamp: Date.now(),
-    type: eventType,
-    context: `${market.tournament} · ${market.sport}`,
-    title: market.match,
-    description
-  });
-
-  if (liveFeedEvents.length > 12) {
-    liveFeedEvents = liveFeedEvents.slice(0, 12);
-  }
-
-  renderMarkets();
-  renderAnalytics();
-  renderLiveFeed();
-  markUpdated();
-  renderHeroStats();
-  renderInsights();
-  renderCombos();
-  renderBetSlip();
-}
-
-function scheduleAutoRefresh() {
-  if (state.refreshIntervalId) {
-    clearInterval(state.refreshIntervalId);
-  }
-  if (state.relativeIntervalId) {
-    clearInterval(state.relativeIntervalId);
-  }
-
-  state.refreshIntervalId = setInterval(() => refreshLiveData("auto"), 45000);
-  state.relativeIntervalId = setInterval(updateLastUpdate, 15000);
-}
-
-function updateLastUpdate() {
-  const label = document.getElementById("last-update");
-  if (!label) return;
-  label.textContent = `Обновлено ${formatRelativeTime(new Date(state.lastUpdate))}`;
-}
-
-function markUpdated() {
-  state.lastUpdate = Date.now();
-  updateLastUpdate();
-}
-
-function attachEventListeners() {
-  document.getElementById("sport-filter").addEventListener("change", renderMarkets);
-  document.getElementById("tournament-filter").addEventListener("change", renderMarkets);
-  document.getElementById("market-filter").addEventListener("change", renderMarkets);
-
-  const quickFilters = document.getElementById("quick-filters");
-  if (quickFilters) {
-    quickFilters.addEventListener("click", event => {
-      const button = event.target.closest(".quick-filter");
-      if (!button) return;
-      const { value } = button.dataset;
-      const sportSelect = document.getElementById("sport-filter");
-      if (sportSelect && sportSelect.value !== value) {
-        sportSelect.value = value;
-        renderMarkets();
-      }
-      updateQuickFiltersActiveState();
-    });
-  }
-
-  const marketsGrid = document.getElementById("markets-grid");
-  if (marketsGrid) {
-    marketsGrid.addEventListener("click", event => {
-      const button = event.target.closest("button[data-action='add-to-slip']");
-      if (!button) return;
-      addSelectionToBetSlip(button.dataset.marketId);
-    });
-  }
-
-  const betSlipList = document.getElementById("betslip-list");
-  if (betSlipList) {
-    betSlipList.addEventListener("click", event => {
-      const button = event.target.closest("button[data-action='remove-selection']");
-      if (!button) return;
-      removeSelectionFromBetSlip(button.dataset.selectionId);
-    });
-  }
-
-  const stakeInput = document.getElementById("stake-input");
-  if (stakeInput) {
-    stakeInput.addEventListener("input", handleStakeChange);
-    stakeInput.addEventListener("change", handleStakeChange);
-  }
-
-  const placeBetButton = document.getElementById("place-bet");
-  if (placeBetButton) {
-    placeBetButton.addEventListener("click", handlePlaceBet);
-  }
-
-  const comboGrid = document.getElementById("combo-grid");
-  if (comboGrid) {
-    comboGrid.addEventListener("click", event => {
-      const card = event.target.closest(".combo-card");
-      if (!card) return;
-      handleComboCopy(card);
-    });
-    comboGrid.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      const card = event.target.closest(".combo-card");
-      if (!card) return;
-      event.preventDefault();
-      handleComboCopy(card);
-    });
-  }
-
+  renderSchedule();
+  renderTech();
+  updateTimestamp();
+  setupAccordion();
+
+  toggleThemeBtn.addEventListener("click", toggleTheme);
+  document.getElementById("sport-filter").addEventListener("change", renderSchedule);
+  document.getElementById("mode-filter").addEventListener("change", renderSchedule);
   document.getElementById("manual-refresh").addEventListener("click", () => {
-    refreshLiveData("manual");
+    state.lastUpdated = Date.now();
+    renderSchedule(true);
+    updateTimestamp();
   });
-
-  document.getElementById("toggle-theme").addEventListener("click", () => {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
-    document.getElementById("toggle-theme").textContent = isDark ? "Тёмная тема" : "Светлая тема";
-    localStorage.setItem("tt-theme", isDark ? "light" : "dark");
-  });
-
-  document.getElementById("faq-accordion").addEventListener("click", event => {
-    if (!event.target.closest(".accordion__trigger")) return;
-    const trigger = event.target.closest(".accordion__trigger");
-    const panel = trigger.nextElementSibling;
-    const expanded = trigger.getAttribute("aria-expanded") === "true";
-
-    trigger.setAttribute("aria-expanded", String(!expanded));
-    panel.hidden = expanded;
-  });
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
-    maximumFractionDigits: 0
-  }).format(amount);
-}
-
-function normalizeSparkline(values) {
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  if (min === max) {
-    return values.map(() => 60);
-  }
-  return values.map(value => 30 + ((value - min) / (max - min)) * 70);
-}
-
-function renderTrendline(values = []) {
-  if (!values.length) {
-    return `<div class="trendline"><span style="height: 50%"></span><span style="height: 50%"></span><span style="height: 50%"></span><span style="height: 50%"></span></div>`;
-  }
-  const normalized = normalizeSparkline(values);
-  return `
-    <div class="trendline">
-      ${normalized
-        .map(point => `<span style="height: ${Math.max(35, Math.min(point, 95))}%"></span>`)
-        .join("")}
-    </div>
-  `;
-}
-
-function clearAdditionalOptions(select) {
-  Array.from(select.querySelectorAll("option")).forEach(option => {
-    if (option.value !== "all") {
-      option.remove();
-    }
-  });
-}
-
-function formatRelativeTime(date) {
-  const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (diffSeconds < 10) {
-    return "только что";
-  }
-  if (diffSeconds < 60) {
-    return `${diffSeconds} сек. назад`;
-  }
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  if (diffMinutes < 60) {
-    return `${diffMinutes} мин. назад`;
-  }
-  const diffHours = Math.floor(diffMinutes / 60);
-  return `${diffHours} ч. назад`;
-}
-
-function formatClock(date) {
-  return date.toLocaleTimeString("ru-RU", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function pickRandom(array) {
-  if (!array.length) return null;
-  const index = Math.floor(Math.random() * array.length);
-  return array[index];
-}
-
-function clampPercent(value) {
-  return Math.max(35, Math.min(92, value));
-}
-
-function clampOdds(value) {
-  return Math.max(1.35, Math.min(2.65, value));
-}
-
-function createFeedEvent({ minutesAgo, type, context, title, description }) {
-  return {
-    id: `seed-${Math.random().toString(36).slice(2, 8)}`,
-    timestamp: Date.now() - minutesAgo * 60 * 1000,
-    type,
-    context,
-    title,
-    description
-  };
-}
+});
 
 function renderHeroStats() {
   const container = document.getElementById("hero-stats");
-  if (!container) return;
-
-  const totalMarkets = marketsData.length;
-  if (!totalMarkets) {
-    container.innerHTML = "";
-    return;
-  }
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
-  );
-  const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
-
-  const stats = [
-    { label: "Прогнозов в ленте", value: totalMarkets },
-    { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
-  ];
-
-  container.innerHTML = stats
-    .map(
-      stat => `
-        <div class="hero-stat">
-          <span class="hero-stat__value">${stat.value}</span>
-          <span class="hero-stat__label">${stat.label}</span>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function renderQuickFilters() {
-  const container = document.getElementById("quick-filters");
-  if (!container) return;
-
-  const sports = ["all", ...new Set(marketsData.map(item => item.sport))];
   container.innerHTML = "";
-
-  sports.forEach(sport => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "quick-filter";
-    button.dataset.value = sport;
-    button.textContent = sport === "all" ? "Все виды" : sport;
-    container.append(button);
-  });
-
-  updateQuickFiltersActiveState();
-}
-
-function updateQuickFiltersActiveState() {
-  const container = document.getElementById("quick-filters");
-  const sportSelect = document.getElementById("sport-filter");
-  if (!container || !sportSelect) return;
-  const currentValue = sportSelect.value;
-  container.querySelectorAll(".quick-filter").forEach(button => {
-    button.classList.toggle("quick-filter--active", button.dataset.value === currentValue);
-  });
-}
-
-function renderInsights() {
-  const grid = document.getElementById("insights-grid");
-  const meta = document.getElementById("insights-meta");
-  if (!grid) return;
-
-  if (!marketsData.length) {
-    grid.innerHTML = `<div class="empty-state">Инсайтов пока нет — ждём новые данные</div>`;
-    if (meta) {
-      meta.textContent = "Нет активных событий";
-    }
-    return;
-  }
-
-  const busiestMarket = marketsData.reduce((acc, item) => (item.loadPercent > acc.loadPercent ? item : acc), marketsData[0]);
-  const sharpestMove = marketsData
-    .map(item => ({ ...item, delta: Math.abs(item.oddsCurrent - item.oddsStart) }))
-    .sort((a, b) => b.delta - a.delta)[0];
-  const heaviestVolume = marketsData.reduce((acc, item) => (item.loadValue > acc.loadValue ? item : acc), marketsData[0]);
-  const averageLoad = Math.round(
-    marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / marketsData.length
-  );
-
-  const cards = [
-    {
-      title: "Максимальный прогруз",
-      value: `${busiestMarket.loadPercent}%`,
-      caption: `${busiestMarket.match}`,
-      detail: `${busiestMarket.tournament} · ${busiestMarket.sport}`
-    },
-    {
-      title: "Резкое движение линии",
-      value: `${sharpestMove.delta.toFixed(2)}`,
-      caption: `${sharpestMove.oddsStart.toFixed(2)} → ${sharpestMove.oddsCurrent.toFixed(2)}`,
-      detail: `${sharpestMove.match}`
-    },
-    {
-      title: "Пул объёма 24ч",
-      value: `${formatCurrency(heaviestVolume.loadValue)}`,
-      caption: `${heaviestVolume.match}`,
-      detail: `${heaviestVolume.tournament}`
-    }
-  ];
-
-  grid.innerHTML = cards
-    .map(
-      card => `
-        <article class="insight-card">
-          <h3>${card.title}</h3>
-          <div class="insight-card__value">${card.value}</div>
-          <div class="insight-card__meta">${card.caption}</div>
-          <div class="insight-card__meta insight-card__meta--muted">${card.detail}</div>
-        </article>
-      `
-    )
-    .join("");
-
-  if (meta) {
-    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · ${new Date().toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
-  }
-}
-
-function renderCombos() {
-  const grid = document.getElementById("combo-grid");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  parlayIdeas.forEach(combo => {
-    const card = document.createElement("article");
-    card.className = "combo-card";
-    card.dataset.comboId = combo.id;
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
-    card.setAttribute(
-      "aria-label",
-      `Скопировать экспресс «${combo.title}» с итоговым коэффициентом ${combo.totalOdds.toFixed(2)}`
-    );
+  heroStats.forEach(stat => {
+    const card = document.createElement("div");
+    card.className = "hero-stat";
     card.innerHTML = `
-      <header class="combo-card__header">
-        <div>
-          <h3>${combo.title}</h3>
-          <div class="combo-card__meta">${combo.risk} риск · уверенность ${combo.confidence}%</div>
-        </div>
-        <span class="combo-card__edge ${combo.edge.startsWith("+") ? "combo-card__edge--positive" : ""}">${combo.edge}</span>
-      </header>
-      <ul class="combo-card__legs">
-        ${combo.legs
-          .map(
-            leg => `
-              <li>
-                <strong>${leg.match}</strong>
-                <span>${leg.pick}</span>
-                <span class="combo-card__tag">${leg.sport}</span>
-              </li>
-            `
-          )
-          .join("")}
-      </ul>
-      <p class="combo-card__comment">${combo.comment}</p>
-      <footer class="combo-card__footer">
-        <span class="combo-card__odds">Итоговый коэфф. ${combo.totalOdds.toFixed(2)}</span>
-        <span class="combo-card__hint" data-default="Нажмите, чтобы скопировать" data-success="Экспресс скопирован!">Нажмите, чтобы скопировать</span>
-      </footer>
+      <span class="hero-stat__value">${stat.value}</span>
+      <span class="hero-stat__label">${stat.label}</span>
+    `;
+    container.append(card);
+  });
+}
+
+function renderTicker() {
+  const ticker = document.getElementById("hero-ticker");
+  ticker.innerHTML = "";
+  tickerEvents.forEach(event => {
+    const row = document.createElement("div");
+    row.className = "ticker__row";
+    row.innerHTML = `
+      <span>${event.tag}</span>
+      <span>${event.text}</span>
+    `;
+    ticker.append(row);
+  });
+}
+
+function renderFeatures() {
+  const grid = document.getElementById("feature-grid");
+  grid.innerHTML = "";
+  features.forEach(feature => {
+    const card = document.createElement("article");
+    card.className = "feature-card";
+    card.innerHTML = `
+      <div class="feature-card__icon">${feature.icon}</div>
+      <h3>${feature.title}</h3>
+      <p>${feature.description}</p>
     `;
     grid.append(card);
   });
 }
 
-function handleComboCopy(card) {
-  const comboId = card.dataset.comboId;
-  const combo = parlayIdeas.find(item => item.id === comboId);
-  if (!combo) return;
+function renderFilters() {
+  const sportFilter = document.getElementById("sport-filter");
+  const sports = Array.from(new Set(schedule.map(item => item.sport)));
+  sportFilter.innerHTML = '<option value="all">Все</option>';
+  sports.forEach(sport => {
+    const option = document.createElement("option");
+    option.value = sport;
+    option.textContent = sport;
+    sportFilter.append(option);
+  });
+}
 
-  const text = [
-    `Экспресс «${combo.title}» (${combo.edge})`,
-    ...combo.legs.map((leg, index) => `${index + 1}. ${leg.match} — ${leg.pick}`),
-    `Итоговый коэффициент: ${combo.totalOdds.toFixed(2)}`
-  ].join("\n");
+function renderSchedule(shuffle = false) {
+  const grid = document.getElementById("schedule-grid");
+  grid.innerHTML = "";
+  const sportFilter = document.getElementById("sport-filter").value;
+  const modeFilter = document.getElementById("mode-filter").value;
 
-  const hint = card.querySelector(".combo-card__hint");
+  let items = [...schedule];
+  if (shuffle) {
+    items = items.sort(() => Math.random() - 0.5);
+  }
 
-  const finalize = () => {
-    if (!hint) return;
-    hint.textContent = hint.dataset.success || "Скопировано";
-    card.classList.add("combo-card--copied");
-    if (comboFeedbackTimers.has(comboId)) {
-      clearTimeout(comboFeedbackTimers.get(comboId));
-    }
-    comboFeedbackTimers.set(
-      comboId,
-      setTimeout(() => {
-        card.classList.remove("combo-card--copied");
-        hint.textContent = hint.dataset.default || "Нажмите, чтобы скопировать";
-      }, 2200)
-    );
-  };
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(finalize).catch(() => {
-      copyTextFallback(text);
-      finalize();
+  items
+    .filter(item => (sportFilter === "all" ? true : item.sport === sportFilter))
+    .filter(item => (modeFilter === "all" ? true : item.mode === modeFilter))
+    .forEach(item => {
+      const card = document.createElement("article");
+      card.className = "schedule-card";
+      card.innerHTML = `
+        <div class="schedule-card__header">
+          <div>
+            <h3>${item.title}</h3>
+            <div class="schedule-card__meta">${item.league} · ${item.sport}</div>
+          </div>
+          <span class="badge">${formatModeLabel(item.mode)}</span>
+        </div>
+        <p>${item.description}</p>
+        <div class="schedule-card__meta">Старт в ${item.start} · ${item.quality}</div>
+        <ul>
+          ${item.extras.map(extra => `<li>${extra}</li>`).join("")}
+        </ul>
+      `;
+      grid.append(card);
     });
-  } else {
-    copyTextFallback(text);
-    finalize();
+
+  if (!grid.children.length) {
+    grid.innerHTML = '<div class="empty-state">Нет эфиров по выбранным параметрам</div>';
   }
 }
 
-function copyTextFallback(text) {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "true");
-  textarea.style.position = "absolute";
-  textarea.style.left = "-9999px";
-  document.body.append(textarea);
-  textarea.select();
-  try {
-    document.execCommand("copy");
-  } catch (error) {
-    console.error("Не удалось скопировать экспресс", error);
+function renderTech() {
+  const grid = document.getElementById("tech-grid");
+  grid.innerHTML = "";
+  technologies.forEach(tech => {
+    const card = document.createElement("article");
+    card.className = "tech-card";
+    card.innerHTML = `
+      <span class="tech-card__label">${tech.label}</span>
+      <h3>${tech.title}</h3>
+      <p>${tech.description}</p>
+    `;
+    grid.append(card);
+  });
+}
+
+function updateTimestamp() {
+  const label = document.getElementById("last-update");
+  const formatter = new Intl.DateTimeFormat("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  label.textContent = `Обновлено в ${formatter.format(state.lastUpdated)}`;
+}
+
+function toggleTheme() {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", state.theme);
+  localStorage.setItem("velocity-theme", state.theme);
+  this.textContent = state.theme === "dark" ? "Светлая тема" : "Тёмная тема";
+}
+
+function setupAccordion() {
+  const accordion = document.getElementById("faq-accordion");
+  accordion.querySelectorAll(".accordion__trigger").forEach(button => {
+    button.addEventListener("click", () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      accordion.querySelectorAll(".accordion__trigger").forEach(other => {
+        if (other !== button) {
+          other.setAttribute("aria-expanded", "false");
+          other.nextElementSibling.hidden = true;
+        }
+      });
+      button.setAttribute("aria-expanded", String(!expanded));
+      button.nextElementSibling.hidden = expanded;
+    });
+  });
+}
+
+function formatModeLabel(mode) {
+  switch (mode) {
+    case "ultra":
+      return "Ультраскоростной";
+    case "multiview":
+      return "Мультиэкран";
+    case "mobile":
+      return "Мобильный";
+    default:
+      return mode;
   }
-  textarea.remove();
 }
