@@ -184,12 +184,6 @@ const parlayIdeas = [
   }
 ];
 
-const betSlipState = {
-  selections: [],
-  stake: 1000,
-  currency: "₽"
-};
-
 const comboFeedbackTimers = new Map();
 
 let liveFeedEvents = [
@@ -243,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderInsights();
   renderCombos();
   renderLiveFeed();
-  renderBetSlip();
   markUpdated();
   scheduleAutoRefresh();
   attachEventListeners();
@@ -310,14 +303,10 @@ function renderMarkets() {
         </div>
       </div>
       <div class="market-card__meta">
-        Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Старт в ${item.time}
+        Объём: ${(item.loadValue / 1000).toFixed(0)} тыс. ₽ · Ставка в ${item.time}
       </div>
       <div class="market-card__meta">
-        Коэффициенты: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
-      </div>
-      <div class="market-card__actions" role="group" aria-label="Действия со ставкой">
-        <span class="market-card__odds">Текущий коэфф. ${item.oddsCurrent.toFixed(2)}</span>
-        <button class="btn btn--secondary" type="button" data-action="add-to-slip" data-market-id="${item.id}">В купон</button>
+        Коэффициент: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
       </div>
       <div class="market-card__trend" aria-hidden="true">
         <span class="market-card__trend-label">Динамика прогруза</span>
@@ -333,190 +322,6 @@ function renderMarkets() {
 
   renderSignals(filteredMarkets);
   updateQuickFiltersActiveState();
-}
-
-function renderBetSlip() {
-  const list = document.getElementById("betslip-list");
-  const stakeInput = document.getElementById("stake-input");
-  if (!list || !stakeInput) return;
-
-  betSlipState.selections = betSlipState.selections
-    .map(selection => {
-      const snapshot = getMarketSnapshot(selection.id);
-      return snapshot ? { ...selection, ...snapshot } : null;
-    })
-    .filter(Boolean);
-
-  list.innerHTML = "";
-
-  if (!betSlipState.selections.length) {
-    list.innerHTML = `<div class="betslip__empty">Выберите исход в линии, чтобы добавить его в купон ставок.</div>`;
-  } else {
-    betSlipState.selections.forEach(selection => {
-      const item = document.createElement("article");
-      item.className = "betslip__item";
-      item.dataset.selectionId = String(selection.id);
-      const kickoff = selection.time ? `Старт ${selection.time}` : "Время уточняется";
-      item.innerHTML = `
-        <header>
-          <div class="betslip__event">
-            <span class="betslip__match">${selection.match}</span>
-            <span class="betslip__meta-line">${selection.sport} · ${selection.tournament}</span>
-          </div>
-          <button class="betslip__remove" type="button" aria-label="Удалить исход" data-action="remove-selection" data-selection-id="${selection.id}">×</button>
-        </header>
-        <div class="betslip__pick">
-          <span>${selection.marketLabel}</span>
-          <span class="betslip__odds">${selection.odds.toFixed(2)}</span>
-        </div>
-        <footer class="betslip__footnote">${kickoff}</footer>
-      `;
-      list.append(item);
-    });
-  }
-
-  stakeInput.value = betSlipState.stake > 0 ? betSlipState.stake : 0;
-  updateBetSlipSummary();
-}
-
-function addSelectionToBetSlip(marketId) {
-  const snapshot = getMarketSnapshot(Number(marketId));
-  if (!snapshot) return;
-
-  const existingIndex = betSlipState.selections.findIndex(selection => selection.id === snapshot.id);
-  if (existingIndex >= 0) {
-    betSlipState.selections[existingIndex] = { ...betSlipState.selections[existingIndex], ...snapshot };
-    renderBetSlip();
-    requestAnimationFrame(() => flashExistingSelection(snapshot.id));
-    setBetSlipFeedback("Исход уже в купоне: коэффициент обновлён.");
-    return;
-  }
-
-  betSlipState.selections.push(snapshot);
-  renderBetSlip();
-  requestAnimationFrame(() => flashExistingSelection(snapshot.id));
-  setBetSlipFeedback(`Добавлено «${snapshot.marketLabel}».`);
-}
-
-function removeSelectionFromBetSlip(selectionId) {
-  const initialLength = betSlipState.selections.length;
-  betSlipState.selections = betSlipState.selections.filter(selection => selection.id !== Number(selectionId));
-  if (betSlipState.selections.length === initialLength) {
-    setBetSlipFeedback("Исход уже удалён.", "negative");
-    return;
-  }
-  renderBetSlip();
-  setBetSlipFeedback("Исход удалён из купона.");
-}
-
-function handleStakeChange(event) {
-  const raw = Number(event.target.value);
-  const sanitized = Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : betSlipState.stake;
-  betSlipState.stake = sanitized;
-  event.target.value = betSlipState.stake;
-  updateBetSlipSummary();
-}
-
-function handlePlaceBet() {
-  if (!betSlipState.selections.length) {
-    setBetSlipFeedback("Добавьте хотя бы одно событие в купон.", "negative");
-    return;
-  }
-
-  if (betSlipState.stake < 50) {
-    setBetSlipFeedback("Минимальная сумма ставки — 50 ₽.", "negative");
-    flashStakeInput();
-    return;
-  }
-
-  const potential = Math.round(betSlipState.stake * calculateCombinedOdds());
-  setBetSlipFeedback(`Купон отправлен на расчёт: потенциальный выигрыш ${formatCurrency(potential)}.`);
-}
-
-function updateBetSlipSummary() {
-  const counter = document.getElementById("betslip-counter");
-  const oddsElement = document.getElementById("betslip-odds");
-  const payoutElement = document.getElementById("betslip-payout");
-  const placeButton = document.getElementById("place-bet");
-
-  const count = betSlipState.selections.length;
-  const odds = calculateCombinedOdds();
-  const potential = count && betSlipState.stake ? Math.round(betSlipState.stake * odds) : 0;
-
-  if (counter) {
-    counter.textContent = formatSelectionCount(count);
-  }
-
-  if (oddsElement) {
-    oddsElement.textContent = count ? odds.toFixed(2) : "1.00";
-  }
-
-  if (payoutElement) {
-    payoutElement.textContent = formatCurrency(potential);
-  }
-
-  if (placeButton) {
-    placeButton.disabled = !count || betSlipState.stake < 50;
-  }
-}
-
-function calculateCombinedOdds() {
-  if (!betSlipState.selections.length) {
-    return 1;
-  }
-  return betSlipState.selections.reduce((product, selection) => product * selection.odds, 1);
-}
-
-function flashExistingSelection(selectionId) {
-  const list = document.getElementById("betslip-list");
-  if (!list) return;
-  const item = list.querySelector(`[data-selection-id="${selectionId}"]`);
-  if (!item) return;
-  item.classList.add("betslip__item--highlight");
-  setTimeout(() => {
-    item.classList.remove("betslip__item--highlight");
-  }, 1400);
-}
-
-function flashStakeInput() {
-  const wrapper = document.querySelector(".betslip__stake-input");
-  if (!wrapper) return;
-  wrapper.classList.add("betslip__stake-input--warning");
-  setTimeout(() => wrapper.classList.remove("betslip__stake-input--warning"), 1600);
-}
-
-function setBetSlipFeedback(message, tone = "info") {
-  const feedback = document.getElementById("betslip-feedback");
-  if (!feedback) return;
-  feedback.textContent = message;
-  feedback.classList.toggle("betslip__feedback--negative", tone === "negative");
-}
-
-function getMarketSnapshot(marketId) {
-  const market = marketsData.find(item => item.id === marketId);
-  if (!market) return null;
-  return {
-    id: market.id,
-    match: market.match,
-    sport: market.sport,
-    tournament: market.tournament,
-    marketLabel: market.marketLabel,
-    odds: market.oddsCurrent,
-    time: market.time
-  };
-}
-
-function formatSelectionCount(count) {
-  if (!count) {
-    return "0 событий";
-  }
-  const form = declOfNum(count, ["событие", "события", "событий"]);
-  return `${count} ${form}`;
-}
-
-function declOfNum(number, titles) {
-  const cases = [2, 0, 1, 1, 1, 2];
-  return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]];
 }
 
 function renderAnalytics() {
@@ -676,7 +481,6 @@ function refreshLiveData(source = "auto") {
   renderHeroStats();
   renderInsights();
   renderCombos();
-  renderBetSlip();
 }
 
 function scheduleAutoRefresh() {
@@ -720,35 +524,6 @@ function attachEventListeners() {
       }
       updateQuickFiltersActiveState();
     });
-  }
-
-  const marketsGrid = document.getElementById("markets-grid");
-  if (marketsGrid) {
-    marketsGrid.addEventListener("click", event => {
-      const button = event.target.closest("button[data-action='add-to-slip']");
-      if (!button) return;
-      addSelectionToBetSlip(button.dataset.marketId);
-    });
-  }
-
-  const betSlipList = document.getElementById("betslip-list");
-  if (betSlipList) {
-    betSlipList.addEventListener("click", event => {
-      const button = event.target.closest("button[data-action='remove-selection']");
-      if (!button) return;
-      removeSelectionFromBetSlip(button.dataset.selectionId);
-    });
-  }
-
-  const stakeInput = document.getElementById("stake-input");
-  if (stakeInput) {
-    stakeInput.addEventListener("input", handleStakeChange);
-    stakeInput.addEventListener("change", handleStakeChange);
-  }
-
-  const placeBetButton = document.getElementById("place-bet");
-  if (placeBetButton) {
-    placeBetButton.addEventListener("click", handlePlaceBet);
   }
 
   const comboGrid = document.getElementById("combo-grid");

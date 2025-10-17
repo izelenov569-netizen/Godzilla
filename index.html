@@ -16,8 +16,7 @@
       <a href="#overview">Обзор</a>
       <a href="#live">Лайв</a>
       <a href="#insights">Пульс</a>
-      <a href="#markets">Линия</a>
-      <a href="#betslip">Купон</a>
+      <a href="#markets">Прогнозы</a>
       <a href="#combos">Экспрессы</a>
       <a href="#analytics">Метрики</a>
       <a href="#faq">FAQ</a>
@@ -27,14 +26,14 @@
   <main>
     <section class="hero" id="overview">
       <div class="hero__content">
-        <h1>Прогнозы, коэффициенты и ставки в одном месте</h1>
+        <h1>Прогнозы и сигналы по всем видам спорта</h1>
         <p>
-          Следите за формой команд и атлетов, отслеживайте движение коэффициентов и собирайте собственные экспрессы в пару кликов.
-          Лента обновляется автоматически и помогает находить тренды до начала матчей и в лайве.
+          Следите за формой команд и атлетов, динамикой коэффициентов и интересом рынка в футболе, баскетболе, хоккее, теннисе,
+          единоборствах и киберспорте. Лента обновляется автоматически и помогает находить тренды до начала матчей.
         </p>
         <div class="hero__stats" id="hero-stats" aria-live="polite"></div>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="#markets">Открыть линию</a>
+          <a class="btn btn--primary" href="#markets">Смотреть прогнозы</a>
           <button class="btn btn--ghost" id="toggle-theme">Тёмная тема</button>
         </div>
       </div>
@@ -104,8 +103,8 @@
     <section class="markets" id="markets">
       <header class="section-header">
         <div>
-          <h2>Онлайн-линия ставок</h2>
-          <p>Мы анализируем национальные чемпионаты, международные турниры и топовые киберлиги, чтобы вы находили ценные коэффициенты и быстро добавляли их в купон.</p>
+          <h2>Актуальные прогнозы на спорт</h2>
+          <p>Мы анализируем национальные чемпионаты, международные турниры и топовые киберлиги, чтобы вы находили ценные коэффициенты.</p>
         </div>
         <div class="quick-filters" id="quick-filters" aria-label="Быстрые фильтры"></div>
         <div class="filters">
@@ -134,44 +133,6 @@
         </div>
       </header>
       <div class="markets__grid" id="markets-grid" role="list"></div>
-    </section>
-
-    <section class="betslip" id="betslip" aria-live="polite">
-      <header class="section-header section-header--compact">
-        <div>
-          <h2>Купон ставок</h2>
-          <p>Соберите одиночные ставки или экспресс: выберите события в линии, задайте размер пари и моментально увидите потенциальный выигрыш.</p>
-        </div>
-        <div class="betslip__meta">
-          <span id="betslip-counter">0 событий</span>
-          <span class="betslip__mode">Демо-режим расчёта</span>
-        </div>
-      </header>
-      <div class="betslip__body">
-        <div class="betslip__list" id="betslip-list" role="list"></div>
-        <aside class="betslip__summary">
-          <label class="betslip__stake">
-            <span>Сумма ставки</span>
-            <div class="betslip__stake-input">
-              <span class="betslip__currency">₽</span>
-              <input type="number" id="stake-input" min="50" step="50" value="1000" aria-label="Сумма ставки">
-            </div>
-          </label>
-          <dl class="betslip__totals">
-            <div>
-              <dt>Коэффициент экспресса</dt>
-              <dd id="betslip-odds">1.00</dd>
-            </div>
-            <div>
-              <dt>Возможный выигрыш</dt>
-              <dd id="betslip-payout">0 ₽</dd>
-            </div>
-          </dl>
-          <button class="btn btn--primary btn--full" id="place-bet" type="button">Заключить пари</button>
-          <div class="betslip__feedback" id="betslip-feedback" role="status" aria-live="polite"></div>
-          <p class="betslip__disclaimer">Все расчёты представлены для демонстрации и не являются офертой букмекера.</p>
-        </aside>
-      </div>
     </section>
 
     <section class="combos" id="combos">
