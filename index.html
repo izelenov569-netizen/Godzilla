@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sportsverse Pulse</title>
+  <title>BetForge Insights</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -11,10 +11,11 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="logo">Sportsverse Pulse</div>
+    <div class="logo">BetForge Insights</div>
     <nav class="site-nav">
       <a href="#overview">Обзор</a>
       <a href="#live">Лайв</a>
+      <a href="#scoreboard">Центр матчей</a>
       <a href="#insights">Пульс</a>
       <a href="#markets">Линия</a>
       <a href="#betslip">Купон</a>
@@ -27,11 +28,8 @@
   <main>
     <section class="hero" id="overview">
       <div class="hero__content">
-        <h1>Прогнозы, коэффициенты и ставки в одном месте</h1>
-        <p>
-          Следите за формой команд и атлетов, отслеживайте движение коэффициентов и собирайте собственные экспрессы в пару кликов.
-          Лента обновляется автоматически и помогает находить тренды до начала матчей и в лайве.
-        </p>
+        <h1>Платформа для ставок с живой аналитикой рынка</h1>
+        <p>BetForge объединяет коэффициенты, прогрузы и рекомендации по ставкам. Следите за ключевыми матчами, отслеживайте динамику рынка и собирайте экспрессы — всё обновляется в режиме реального времени.</p>
         <div class="hero__stats" id="hero-stats" aria-live="polite"></div>
         <div class="hero__cta">
           <a class="btn btn--primary" href="#markets">Открыть линию</a>
@@ -49,15 +47,15 @@
         <div class="hero__ticker">
           <div class="ticker__row">
             <span>LIVE</span>
-            <span>Евролига · «Реал» и «Барса» играют овертайм</span>
+            <span>APL · «Арсенал» и «Сити» меняют статус фаворита в лайве</span>
           </div>
           <div class="ticker__row">
             <span>ALERT</span>
-            <span>NHL · коэффициент на победу «Торонто» опустился до 1.72</span>
+            <span>NHL · поток на «Торонто» превысил 300 тыс. ₽ за час</span>
           </div>
           <div class="ticker__row">
             <span>TREND</span>
-            <span>ATP Masters · тотал сетов &gt; 2.5 вырос до 2.20</span>
+            <span>UFC 300 · коэффициент на Махачева закрепился ниже 1.70</span>
           </div>
         </div>
       </div>
@@ -67,7 +65,7 @@
       <header class="section-header section-header--compact">
         <div>
           <h2>Пульс спортивного рынка</h2>
-          <p>Ключевые импульсы и сигналы, собранные из потоков данных и моделей Sportsverse Pulse.</p>
+          <p>Ключевые импульсы и сигналы, собранные из потоков данных и моделей BetForge.</p>
         </div>
         <div class="insights__meta" id="insights-meta"></div>
       </header>
@@ -99,6 +97,17 @@
           <ul class="live-feed" id="live-feed"></ul>
         </article>
       </div>
+    </section>
+
+    <section class="scoreboard" id="scoreboard">
+      <header class="section-header section-header--compact">
+        <div>
+          <h2>Центр матчей BetForge</h2>
+          <p>Топовые события вечера с ключевыми маркетами, объёмом ставок и динамикой коэффициентов.</p>
+        </div>
+        <div class="scoreboard__meta">Отбор обновляется автоматически каждые 45 секунд.</div>
+      </header>
+      <div class="scoreboard__grid" id="scoreboard-grid" role="list"></div>
     </section>
 
     <section class="markets" id="markets">
@@ -240,7 +249,7 @@
 
   <footer class="site-footer">
     <div>
-      <strong>Sportsverse Pulse</strong> — аналитика спорта и кастомные модели вероятностей.
+      <strong>BetForge Insights</strong> — аналитика спорта и кастомные модели вероятностей.
     </div>
     <div class="footer-links">
       <a href="#overview">Наверх</a>

@@ -548,7 +548,7 @@ main {
   gap: 1.1rem;
 }
 
-.live-feed__item {
+.live-feed__item { 
   padding: 1rem 1.1rem;
   border-radius: 16px;
   background: rgba(9, 14, 24, 0.85);
@@ -560,6 +560,147 @@ main {
 [data-theme="light"] .live-feed__item {
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(17, 21, 36, 0.08);
+}
+
+.scoreboard {
+  margin: 4rem 0 2rem;
+}
+
+.scoreboard__meta {
+  color: var(--text-muted);
+  align-self: flex-end;
+  font-size: 0.85rem;
+}
+
+.scoreboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.scoreboard-card {
+  background: var(--bg-alt);
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  padding: 1.6rem 1.4rem;
+  display: grid;
+  gap: 1.1rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, border-color 0.3s ease;
+}
+
+.scoreboard-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(51, 240, 148, 0.35);
+}
+
+.scoreboard-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.scoreboard-card h3 {
+  font-size: 1.2rem;
+}
+
+.scoreboard-card__league {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.scoreboard-card__confidence {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(51, 240, 148, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(51, 240, 148, 0.28);
+}
+
+.scoreboard-card__confidence--elite {
+  background: rgba(132, 94, 247, 0.12);
+  color: #a18bff;
+  border-color: rgba(132, 94, 247, 0.32);
+}
+
+.scoreboard-card__confidence--high {
+  background: rgba(51, 240, 148, 0.16);
+  color: var(--accent);
+}
+
+.scoreboard-card__confidence--solid {
+  background: rgba(51, 240, 148, 0.1);
+  color: var(--text);
+}
+
+.scoreboard-card__confidence--watch {
+  background: rgba(255, 189, 57, 0.12);
+  color: #ffbd39;
+  border-color: rgba(255, 189, 57, 0.32);
+}
+
+.scoreboard-card__markets {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.scoreboard-card__market {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(151, 162, 196, 0.16);
+}
+
+[data-theme="light"] .scoreboard-card__market {
+  background: rgba(17, 21, 36, 0.04);
+  border-color: rgba(17, 21, 36, 0.08);
+}
+
+.scoreboard-card__market-name {
+  font-size: 0.9rem;
+}
+
+.scoreboard-card__market-odds {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.scoreboard-card__delta {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.scoreboard-card__delta--up {
+  color: #33f094;
+}
+
+.scoreboard-card__delta--down {
+  color: #ff7a8a;
+}
+
+.scoreboard-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.scoreboard-card__pulse {
+  font-weight: 600;
+  color: var(--text);
 }
 
 .live-feed__item header {
@@ -1217,12 +1358,21 @@ main {
     justify-content: flex-start;
   }
 
-  .insights {
+  .insights { 
     padding: 2.5rem 1.8rem;
   }
 
   .insights__meta {
     text-align: left;
+  }
+
+  .scoreboard__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreboard-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .hero__stats {
