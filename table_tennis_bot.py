@@ -43,8 +43,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from telegram import Update
-from telegram.ext import (Application, CommandHandler, ContextTypes,
+from telegram import Update # type: ignore
+from telegram.ext import (Application, CommandHandler, ContextTypes, # pyright: ignore[reportMissingImports]
                           MessageHandler, filters)
 
 
