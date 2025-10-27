@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Fan Zhendong",
+    "country": "Китай",
+    "rating": 2890,
+    "style": "агрессивный топ-спин",
+    "hand": "правша",
+    "form": 0.91,
+    "serve": 0.93,
+    "receive": 0.9
+  },
+  {
+    "name": "Ma Long",
+    "country": "Китай",
+    "rating": 2845,
+    "style": "универсальный атакующий",
+    "hand": "правша",
+    "form": 0.86,
+    "serve": 0.88,
+    "receive": 0.89
+  },
+  {
+    "name": "Wang Chuqin",
+    "country": "Китай",
+    "rating": 2820,
+    "style": "левша, агрессия у стола",
+    "hand": "левша",
+    "form": 0.88,
+    "serve": 0.9,
+    "receive": 0.87
+  },
+  {
+    "name": "Tomokazu Harimoto",
+    "country": "Япония",
+    "rating": 2755,
+    "style": "скоростной контратакующий",
+    "hand": "правша",
+    "form": 0.8,
+    "serve": 0.82,
+    "receive": 0.81
+  },
+  {
+    "name": "Hugo Calderano",
+    "country": "Бразилия",
+    "rating": 2720,
+    "style": "атакующий с глубины",
+    "hand": "правша",
+    "form": 0.78,
+    "serve": 0.79,
+    "receive": 0.77
+  },
+  {
+    "name": "Truls Moregard",
+    "country": "Швеция",
+    "rating": 2685,
+    "style": "креативный атакующий",
+    "hand": "правша",
+    "form": 0.75,
+    "serve": 0.76,
+    "receive": 0.73
+  },
+  {
+    "name": "Dimitrij Ovtcharov",
+    "country": "Германия",
+    "rating": 2660,
+    "style": "силовой топ-спин",
+    "hand": "правша",
+    "form": 0.72,
+    "serve": 0.78,
+    "receive": 0.74
+  },
+  {
+    "name": "Lin Yun-Ju",
+    "country": "Тайвань",
+    "rating": 2695,
+    "style": "левша, вращение",
+    "hand": "левша",
+    "form": 0.76,
+    "serve": 0.8,
+    "receive": 0.79
+  },
+  {
+    "name": "Jang Woojin",
+    "country": "Южная Корея",
+    "rating": 2670,
+    "style": "универсальный",
+    "hand": "правша",
+    "form": 0.74,
+    "serve": 0.75,
+    "receive": 0.76
+  },
+  {
+    "name": "Timo Boll",
+    "country": "Германия",
+    "rating": 2635,
+    "style": "левша, контроль",
+    "hand": "левша",
+    "form": 0.68,
+    "serve": 0.72,
+    "receive": 0.7
+  }
+]

@@ -1,17 +1,18 @@
-"""Telegram bot for managing a table tennis cup bracket.
+"""Telegram bot that delivers table tennis match predictions.
 
-The bot is built on top of the python-telegram-bot v20 API and keeps all
-state inside a JSON file.  The design focuses on running a single cup at a
-time and guiding the organiser through registration, bracket creation and
-score reporting.
+The bot is built on top of the ``python-telegram-bot`` v20 asynchronous API.
+It loads a curated list of top professional players and, given two names,
+calculates a probability-based prediction using a lightweight rating + form
+model. The command set focuses on quickly checking available players and
+requesting head-to-head forecasts.
 
 Usage
 -----
-1. Install dependencies::
+1. Install the dependency::
 
        pip install python-telegram-bot==20.6
 
-2. Export your bot token::
+2. Export the bot token::
 
        export TELEGRAM_BOT_TOKEN=123456:ABC...
 
@@ -19,377 +20,430 @@ Usage
 
        python table_tennis_bot.py
 
-Command summary
----------------
-* /start – greeting and current cup status.
-* /help – detailed instructions.
-* /newcup <name> – reset state and start a new cup registration.
-* /addplayer <name> – register a participant.
-* /listplayers – list the current player pool.
-* /startcup – lock registration and generate the opening bracket.
-* /bracket – show the current round matches and results.
-* /result <match_id> <winner> <score> – report a finished match.
+Commands
+--------
+* /start – greeting and quick tips.
+* /help – detailed instructions and examples.
+* /players – list the players available for predictions.
+* /player <name> – show a short profile for a specific player.
+* /predict <player1> vs <player2> – generate a prediction for the matchup.
 
-All state is persisted in ``data/cup_state.json`` so the bot can be stopped
-and resumed without data loss.
+Player data is stored inside ``data/players.json`` so you can extend the
+library with your own ratings.
 """
 
 from __future__ import annotations
 
+import difflib
 import json
 import logging
+import math
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from telegram import Update
-from telegram.ext import (Application, CommandHandler, ContextTypes,
-                          MessageHandler, filters)
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 
 DATA_DIR = Path("data")
-STATE_FILE = DATA_DIR / "cup_state.json"
+PLAYERS_FILE = DATA_DIR / "players.json"
+
+DEFAULT_PLAYERS: List[Dict[str, object]] = [
+    {
+        "name": "Fan Zhendong",
+        "country": "Китай",
+        "rating": 2890,
+        "style": "агрессивный топ-спин",
+        "hand": "правша",
+        "form": 0.91,
+        "serve": 0.93,
+        "receive": 0.90,
+    },
+    {
+        "name": "Ma Long",
+        "country": "Китай",
+        "rating": 2845,
+        "style": "универсальный атакующий",
+        "hand": "правша",
+        "form": 0.86,
+        "serve": 0.88,
+        "receive": 0.89,
+    },
+    {
+        "name": "Wang Chuqin",
+        "country": "Китай",
+        "rating": 2820,
+        "style": "левша, агрессия у стола",
+        "hand": "левша",
+        "form": 0.88,
+        "serve": 0.90,
+        "receive": 0.87,
+    },
+    {
+        "name": "Tomokazu Harimoto",
+        "country": "Япония",
+        "rating": 2755,
+        "style": "скоростной контратакующий",
+        "hand": "правша",
+        "form": 0.80,
+        "serve": 0.82,
+        "receive": 0.81,
+    },
+    {
+        "name": "Hugo Calderano",
+        "country": "Бразилия",
+        "rating": 2720,
+        "style": "атакующий с глубины",
+        "hand": "правша",
+        "form": 0.78,
+        "serve": 0.79,
+        "receive": 0.77,
+    },
+    {
+        "name": "Truls Moregard",
+        "country": "Швеция",
+        "rating": 2685,
+        "style": "креативный атакующий",
+        "hand": "правша",
+        "form": 0.75,
+        "serve": 0.76,
+        "receive": 0.73,
+    },
+    {
+        "name": "Dimitrij Ovtcharov",
+        "country": "Германия",
+        "rating": 2660,
+        "style": "силовой топ-спин",
+        "hand": "правша",
+        "form": 0.72,
+        "serve": 0.78,
+        "receive": 0.74,
+    },
+    {
+        "name": "Lin Yun-Ju",
+        "country": "Тайвань",
+        "rating": 2695,
+        "style": "левша, вращение",
+        "hand": "левша",
+        "form": 0.76,
+        "serve": 0.80,
+        "receive": 0.79,
+    },
+    {
+        "name": "Jang Woojin",
+        "country": "Южная Корея",
+        "rating": 2670,
+        "style": "универсальный",
+        "hand": "правша",
+        "form": 0.74,
+        "serve": 0.75,
+        "receive": 0.76,
+    },
+    {
+        "name": "Timo Boll",
+        "country": "Германия",
+        "rating": 2635,
+        "style": "левша, контроль",
+        "hand": "левша",
+        "form": 0.68,
+        "serve": 0.72,
+        "receive": 0.70,
+    },
+]
 
 
 def ensure_data_dir() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def load_state() -> Dict:
-    if STATE_FILE.exists():
-        with STATE_FILE.open("r", encoding="utf-8") as fh:
-            return json.load(fh)
-    return {
-        "cup": {
-            "name": None,
-            "status": "idle",
-            "players": [],
-            "rounds": [],
-            "current_round": 0,
-            "next_match_id": 1,
-        }
-    }
-
-
-def save_state(state: Dict) -> None:
-    ensure_data_dir()
-    with STATE_FILE.open("w", encoding="utf-8") as fh:
-        json.dump(state, fh, ensure_ascii=False, indent=2)
-
-
-def pairwise(items: List[Optional[str]]) -> List[List[Optional[str]]]:
-    return [items[i : i + 2] for i in range(0, len(items), 2)]
-
-
-def expand_to_power_of_two(players: List[str]) -> List[Optional[str]]:
-    """Expand the player list with None placeholders until it reaches 2**n."""
-
-    filled = list(players)
-    target = 1
-    while target < max(2, len(players)):
-        target *= 2
-    while len(filled) < target:
-        filled.append(None)
-    return filled
-
-
 @dataclass
-class Match:
-    match_id: int
-    round_no: int
-    player1: Optional[str]
-    player2: Optional[str]
-    winner: Optional[str] = None
-    score: Optional[str] = None
+class Player:
+    name: str
+    country: str
+    rating: int
+    style: str
+    hand: str
+    form: float
+    serve: float
+    receive: float
 
-    def to_dict(self) -> Dict:
-        return {
-            "id": self.match_id,
-            "round": self.round_no,
-            "player1": self.player1,
-            "player2": self.player2,
-            "winner": self.winner,
-            "score": self.score,
-        }
+    @classmethod
+    def from_dict(cls, payload: Dict[str, object]) -> "Player":
+        return cls(
+            name=str(payload["name"]),
+            country=str(payload.get("country", "")),
+            rating=int(payload.get("rating", 0)),
+            style=str(payload.get("style", "")),
+            hand=str(payload.get("hand", "")),
+            form=float(payload.get("form", 0.5)),
+            serve=float(payload.get("serve", 0.5)),
+            receive=float(payload.get("receive", 0.5)),
+        )
+
+    def to_dict(self) -> Dict[str, object]:
+        return asdict(self)
+
+    def profile(self) -> str:
+        return (
+            f"{self.name} ({self.country})\n"
+            f"Рейтинг ITTF: {self.rating}\n"
+            f"Игровой стиль: {self.style}, {self.hand}\n"
+            f"Форма: {self.form * 100:.0f}% побед в последних матчах\n"
+            f"Качество подачи/приёма: {self.serve * 100:.0f}% / {self.receive * 100:.0f}%"
+        )
 
 
-@dataclass
-class CupManager:
-    state: Dict = field(default_factory=load_state)
+class PlayerDatabase:
+    def __init__(self) -> None:
+        self._players = self._load_players()
 
-    # --- convenience properties -------------------------------------------------
-    @property
-    def cup(self) -> Dict:
-        return self.state["cup"]
+    def _load_players(self) -> Dict[str, Player]:
+        ensure_data_dir()
+        if not PLAYERS_FILE.exists():
+            with PLAYERS_FILE.open("w", encoding="utf-8") as fh:
+                json.dump(DEFAULT_PLAYERS, fh, ensure_ascii=False, indent=2)
 
-    @property
-    def status(self) -> str:
-        return self.cup.get("status", "idle")
+        with PLAYERS_FILE.open("r", encoding="utf-8") as fh:
+            raw_data = json.load(fh)
 
-    @property
-    def players(self) -> List[str]:
-        return self.cup.setdefault("players", [])
+        players: Dict[str, Player] = {}
+        for entry in raw_data:
+            player = Player.from_dict(entry)
+            players[player.name.casefold()] = player
+        return players
 
-    @property
-    def rounds(self) -> List[List[Dict]]:
-        return self.cup.setdefault("rounds", [])
+    def list_players(self) -> List[Player]:
+        return sorted(self._players.values(), key=lambda p: p.rating, reverse=True)
 
-    @property
-    def current_round(self) -> int:
-        return self.cup.get("current_round", 0)
-
-    # --- state persistence ------------------------------------------------------
-    def save(self) -> None:
-        save_state(self.state)
-
-    # --- business logic --------------------------------------------------------
-    def new_cup(self, name: str) -> None:
-        self.state["cup"] = {
-            "name": name,
-            "status": "registration",
-            "players": [],
-            "rounds": [],
-            "current_round": 0,
-            "next_match_id": 1,
-        }
-        self.save()
-
-    def add_player(self, player: str) -> str:
-        if self.status not in {"registration"}:
-            return "Сейчас нельзя добавлять игроков: регистрация закрыта."
-        player = player.strip()
-        if not player:
-            return "Имя игрока не должно быть пустым."
-        if player in self.players:
-            return "Такой игрок уже зарегистрирован."
-        self.players.append(player)
-        self.save()
-        return f"Игрок {player} добавлен."
-
-    def list_players(self) -> str:
-        if not self.players:
-            return "Пока нет зарегистрированных игроков."
-        header = f"Всего игроков: {len(self.players)}"
-        body = "\n".join(f"• {name}" for name in self.players)
-        return f"{header}\n{body}"
-
-    def start_cup(self) -> str:
-        if self.status != "registration":
-            return "Нельзя начать турнир: либо он уже идёт, либо не создан."
-        if len(self.players) < 2:
-            return "Чтобы начать турнир, добавьте минимум двух игроков."
-
-        expanded = expand_to_power_of_two(self.players)
-        pairs = pairwise(expanded)
-        round_matches = []
-        for player1, player2 in pairs:
-            match = Match(
-                match_id=self._next_match_id(),
-                round_no=1,
-                player1=player1,
-                player2=player2,
-            )
-            if player1 is None and player2 is None:
-                match.score = "BYE"
-            elif player2 is None:
-                match.winner = player1
-                match.score = "BYE"
-            round_matches.append(match.to_dict())
-
-        self.rounds.append(round_matches)
-        self.cup["status"] = "in_progress"
-        self.cup["current_round"] = 1
-        self.save()
-
-        auto_advances = [m for m in round_matches if m["winner"]]
-        message = "Турнир начат! Сетка первого раунда сформирована."
-        if auto_advances:
-            names = ", ".join(m["winner"] for m in auto_advances if m["winner"])
-            message += f"\nСледующие игроки прошли дальше автоматически: {names}."
-        return message
-
-    def bracket_summary(self) -> str:
-        if self.status == "idle" or not self.rounds:
-            return "Сетка пока не создана."
-
-        lines = [f"Текущий статус: {self.status}"]
-        for round_idx, matches in enumerate(self.rounds, start=1):
-            lines.append(f"\nРаунд {round_idx}:")
-            for match in matches:
-                p1 = match.get("player1") or "BYE"
-                p2 = match.get("player2") or "BYE"
-                winner = match.get("winner")
-                score = match.get("score")
-                if winner:
-                    lines.append(
-                        f"#{match['id']} {p1} vs {p2} — победил {winner} ({score})"
-                    )
-                else:
-                    lines.append(f"#{match['id']} {p1} vs {p2} — в ожидании")
-        return "\n".join(lines)
-
-    def report_result(self, match_id: int, winner: str, score: str) -> str:
-        match = self._find_match(match_id)
-        if not match:
-            return "Матч с таким номером не найден."
-        if match.get("winner"):
-            return "Результат этого матча уже зафиксирован."
-
-        players = {match.get("player1"), match.get("player2")}
-        players.discard(None)
-        if winner not in players:
-            return "Победитель должен быть одним из участников матча."
-
-        match["winner"] = winner
-        match["score"] = score
-        self.save()
-
-        self._update_next_round(match)
-        return "Результат принят."
-
-    # --- helpers ----------------------------------------------------------------
-    def _next_match_id(self) -> int:
-        next_id = self.cup.get("next_match_id", 1)
-        self.cup["next_match_id"] = next_id + 1
-        return next_id
-
-    def _find_match(self, match_id: int) -> Optional[Dict]:
-        for matches in self.rounds:
-            for match in matches:
-                if match.get("id") == match_id:
-                    return match
+    def find_player(self, name: str) -> Optional[Player]:
+        key = name.casefold().strip()
+        if key in self._players:
+            return self._players[key]
+        for candidate in self._players.values():
+            if candidate.name.casefold() == key:
+                return candidate
         return None
 
-    def _update_next_round(self, completed_match: Dict) -> None:
-        round_no = completed_match["round"]
-        matches = self.rounds[round_no - 1]
-        all_finished = all(self._is_match_finished(m) for m in matches)
-        if not all_finished:
-            self.save()
-            return
-
-        winners = [
-            None if self._is_double_bye(m) else m.get("winner")
-            for m in matches
-        ]
-        if len(winners) == 1:
-            self.cup["status"] = "finished"
-            self.save()
-            return
-
-        next_round_index = round_no
-        if len(self.rounds) <= next_round_index:
-            self.rounds.append([])
-
-        next_round_matches = self.rounds[next_round_index]
-        if next_round_matches:
-            # round already prepared, just fill placeholders
-            self.save()
-            return
-
-        for player1, player2 in pairwise(winners):
-            match = Match(
-                match_id=self._next_match_id(),
-                round_no=round_no + 1,
-                player1=player1,
-                player2=player2,
-            )
-            if player1 is None and player2 is None:
-                match.score = "BYE"
-            elif player2 is None:
-                match.winner = player1
-                match.score = "BYE"
-            next_round_matches.append(match.to_dict())
-
-        self.cup["current_round"] = round_no + 1
-        self.save()
-
-    def _is_double_bye(self, match: Dict) -> bool:
-        return match.get("player1") is None and match.get("player2") is None
-
-    def _is_match_finished(self, match: Dict) -> bool:
-        return bool(match.get("winner")) or self._is_double_bye(match)
+    def suggestions(self, query: str, limit: int = 3) -> List[str]:
+        names = [player.name for player in self._players.values()]
+        return difflib.get_close_matches(query, names, n=limit, cutoff=0.5)
 
 
-manager = CupManager()
+class PredictionEngine:
+    def __init__(self, database: PlayerDatabase) -> None:
+        self.database = database
+
+    def predict(self, player_one: Player, player_two: Player) -> Dict[str, object]:
+        probability_one = self._win_probability(player_one, player_two)
+        probability_two = 1 - probability_one
+        winner, winner_prob = (
+            (player_one, probability_one)
+            if probability_one >= probability_two
+            else (player_two, probability_two)
+        )
+        expected_score = self._expected_score(winner_prob)
+        return {
+            "probability_player1": probability_one,
+            "probability_player2": probability_two,
+            "predicted_winner": winner.name,
+            "expected_score": expected_score,
+            "confidence_text": self._confidence_text(winner.name, winner_prob),
+        }
+
+    @staticmethod
+    def _clamp(value: float, minimum: float = 0.0, maximum: float = 1.0) -> float:
+        return max(minimum, min(maximum, value))
+
+    def _win_probability(self, player_one: Player, player_two: Player) -> float:
+        rating_component = 1 / (
+            1 + math.pow(10, (player_two.rating - player_one.rating) / 350)
+        )
+        form_component = 0.5 + (player_one.form - player_two.form) * 0.5
+        serve_component = 0.5 + (
+            (player_one.serve + player_one.receive)
+            - (player_two.serve + player_two.receive)
+        ) * 0.25
+
+        combined = (
+            rating_component * 0.6
+            + self._clamp(form_component) * 0.25
+            + self._clamp(serve_component) * 0.15
+        )
+        return self._clamp(combined)
+
+    def _expected_score(self, winner_probability: float) -> str:
+        if winner_probability >= 0.8:
+            return "3:0"
+        if winner_probability >= 0.65:
+            return "3:1"
+        if winner_probability >= 0.55:
+            return "3:2"
+        if winner_probability >= 0.45:
+            return "3:2"
+        if winner_probability >= 0.35:
+            return "2:3"
+        if winner_probability >= 0.2:
+            return "1:3"
+        return "0:3"
+
+    def _confidence_text(self, winner_name: str, probability: float) -> str:
+        if probability >= 0.8:
+            return f"{winner_name} — явный фаворит"
+        if probability >= 0.65:
+            return f"{winner_name} имеет ощутимое преимущество"
+        if probability >= 0.55:
+            return f"{winner_name} чуть ближе к победе"
+        return "Матч обещает быть очень ровным"
+
+
+def format_prediction(player_one: Player, player_two: Player, result: Dict[str, object]) -> str:
+    prob_one = float(result["probability_player1"]) * 100
+    prob_two = float(result["probability_player2"]) * 100
+    lines = [
+        f"{player_one.name} vs {player_two.name}",
+        f"Вероятность победы {player_one.name}: {prob_one:.1f}%",
+        f"Вероятность победы {player_two.name}: {prob_two:.1f}%",
+        "",
+        (
+            f"Прогноз: {result['predicted_winner']} выиграет со счётом "
+            f"{result['expected_score']} (первая цифра — в пользу фаворита)."
+        ),
+        str(result["confidence_text"]),
+        "",
+        "Факторы модели:",
+        (
+            f"• Рейтинг ITTF: {player_one.rating} против {player_two.rating}."
+        ),
+        (
+            "• Форма (последние матчи): "
+            f"{player_one.form * 100:.0f}% vs {player_two.form * 100:.0f}%."
+        ),
+        (
+            "• Качество подачи/приёма: "
+            f"{player_one.serve * 100:.0f}% / {player_one.receive * 100:.0f}%"
+            f" против {player_two.serve * 100:.0f}% / {player_two.receive * 100:.0f}%."
+        ),
+        "",
+        "Модель предназначена для ориентировочных оценок и не заменяет детальный разбор формы игроков.",
+    ]
+    return "\n".join(lines)
+
+
+def parse_players_argument(args: Iterable[str]) -> Optional[Tuple[str, str]]:
+    text = " ".join(args).strip()
+    if not text:
+        return None
+
+    separators = [" vs ", " против ", " v ", " - ", " — ", " : ", " ; "]
+    for sep in separators:
+        if sep in text:
+            first, second = text.split(sep, 1)
+            first = first.strip()
+            second = second.strip()
+            if first and second:
+                return first, second
+
+    return None
+
+
+database = PlayerDatabase()
+predictor = PredictionEngine(database)
 
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    cup_name = manager.cup.get("name")
-    greeting = [
-        "Привет! Я бот для ведения сетки настольного тенниса.",
-        "Используйте /help, чтобы узнать доступные команды.",
-    ]
-    if cup_name:
-        greeting.append(f"Активный турнир: {cup_name} (статус: {manager.status}).")
-    await update.message.reply_text("\n".join(greeting))
+    await update.message.reply_text(
+        "Привет! Я подскажу вероятность победы в матчах по настольному теннису.\n"
+        "Используйте /predict <игрок1> vs <игрок2>, чтобы получить прогноз.\n"
+        "Команда /players покажет доступных игроков."
+    )
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    text = (
-        "Доступные команды:\n"
-        "/newcup <название> — создать новую сетку и открыть регистрацию.\n"
-        "/addplayer <имя> — добавить участника.\n"
-        "/listplayers — показать зарегистрированных игроков.\n"
-        "/startcup — завершить регистрацию и сгенерировать сетку.\n"
-        "/bracket — показать текущую сетку и результаты.\n"
-        "/result <id> <победитель> <счёт> — зафиксировать матч.\n"
-        "Пример: /result 3 Иванов 3:1"
-    )
-    await update.message.reply_text(text)
-
-
-async def cmd_newcup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not context.args:
-        await update.message.reply_text("Укажите название турнира после команды.")
-        return
-    name = " ".join(context.args)
-    manager.new_cup(name)
     await update.message.reply_text(
-        f"Создан турнир '{name}'. Добавляйте игроков командой /addplayer."
+        "Доступные команды:\n"
+        "/players — список игроков в базе.\n"
+        "/player <имя> — краткая карточка игрока.\n"
+        "/predict <игрок1> vs <игрок2> — прогноз и вероятность победы.\n\n"
+        "Пример: /predict Fan Zhendong vs Ma Long\n"
+        "Для точного совпадения имён смотрите /players."
     )
 
 
-async def cmd_addplayer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def cmd_players(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    players = database.list_players()
+    lines = ["Доступные игроки:"]
+    for player in players:
+        lines.append(
+            f"• {player.name} ({player.country}) — рейтинг {player.rating}"
+        )
+    await update.message.reply_text("\n".join(lines))
+
+
+async def cmd_player(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not context.args:
-        await update.message.reply_text("Укажите имя игрока после команды.")
-        return
-    name = " ".join(context.args)
-    message = manager.add_player(name)
-    await update.message.reply_text(message)
-
-
-async def cmd_listplayers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(manager.list_players())
-
-
-async def cmd_startcup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = manager.start_cup()
-    await update.message.reply_text(message)
-
-
-async def cmd_bracket(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    summary = manager.bracket_summary()
-    await update.message.reply_text(summary)
-
-
-async def cmd_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if len(context.args) < 3:
         await update.message.reply_text(
-            "Использование: /result <id> <победитель> <счёт>."
+            "Укажите имя игрока после команды, например: /player Ma Long"
         )
         return
 
-    match_id_str, winner, *score_parts = context.args
-    try:
-        match_id = int(match_id_str)
-    except ValueError:
-        await update.message.reply_text("Номер матча должен быть числом.")
+    query = " ".join(context.args)
+    player = database.find_player(query)
+    if player:
+        await update.message.reply_text(player.profile())
         return
 
-    score = " ".join(score_parts)
-    message = manager.report_result(match_id, winner, score)
+    suggestions = database.suggestions(query)
+    if suggestions:
+        await update.message.reply_text(
+            "Игрок не найден. Возможно, вы имели в виду: "
+            + ", ".join(suggestions)
+        )
+    else:
+        await update.message.reply_text(
+            "Игрок не найден. Используйте /players для доступных имён."
+        )
+
+
+async def cmd_predict(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    parsed = parse_players_argument(context.args)
+    if not parsed:
+        await update.message.reply_text(
+            "Использование: /predict <игрок1> vs <игрок2>.\n"
+            "Пример: /predict Fan Zhendong vs Ma Long"
+        )
+        return
+
+    left_name, right_name = parsed
+    player_left = database.find_player(left_name)
+    player_right = database.find_player(right_name)
+
+    missing: List[str] = []
+    if not player_left:
+        missing.append(left_name)
+    if not player_right:
+        missing.append(right_name)
+
+    if missing:
+        messages = [
+            "Следующие игроки не найдены: " + ", ".join(missing) + ".",
+        ]
+        suggestions = database.suggestions(missing[0])
+        if suggestions:
+            messages.append("Возможно, вы имели в виду: " + ", ".join(suggestions))
+        messages.append("Проверьте список /players.")
+        await update.message.reply_text("\n".join(messages))
+        return
+
+    result = predictor.predict(player_left, player_right)
+    message = format_prediction(player_left, player_right, result)
     await update.message.reply_text(message)
 
 
@@ -411,12 +465,9 @@ def main() -> None:
 
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("help", cmd_help))
-    application.add_handler(CommandHandler("newcup", cmd_newcup))
-    application.add_handler(CommandHandler("addplayer", cmd_addplayer))
-    application.add_handler(CommandHandler("listplayers", cmd_listplayers))
-    application.add_handler(CommandHandler("startcup", cmd_startcup))
-    application.add_handler(CommandHandler("bracket", cmd_bracket))
-    application.add_handler(CommandHandler("result", cmd_result))
+    application.add_handler(CommandHandler("players", cmd_players))
+    application.add_handler(CommandHandler("player", cmd_player))
+    application.add_handler(CommandHandler("predict", cmd_predict))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, fallback))
 
     application.run_polling()
@@ -424,4 +475,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
