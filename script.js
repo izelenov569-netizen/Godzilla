@@ -1,186 +1,186 @@
 const marketsData = [
   {
     id: 1,
-    sport: "Футбол",
-    tournament: "Лига чемпионов УЕФА",
-    stage: "1/2 финала",
-    match: "Манчестер Сити — Реал Мадрид",
+    sport: "Мужчины · Одиночки",
+    tournament: "WTT Champions Иньчуань",
+    stage: "1/4 финала",
+    match: "Фань Чжэндун — Ма Лун",
     market: "match_winner",
-    marketLabel: "Победа Манчестер Сити",
-    loadPercent: 74,
-    oddsStart: 1.95,
-    oddsCurrent: 1.68,
-    loadValue: 325000,
-    impact: "Высокий",
-    time: "22:00 MSK",
-    movement: [52, 61, 68, 74]
+    marketLabel: "Победа Фань Чжэндун",
+    loadPercent: 71,
+    oddsStart: 1.85,
+    oddsCurrent: 1.62,
+    loadValue: 186000,
+    impact: "Экстремальный",
+    time: "15:30 MSK",
+    movement: [58, 63, 68, 71]
   },
   {
     id: 2,
-    sport: "Баскетбол",
-    tournament: "NBA Плей-офф",
-    stage: "Матч 5",
-    match: "Лос-Анджелес Лейкерс — Голден Стэйт Уорриорз",
+    sport: "Женщины · Одиночки",
+    tournament: "WTT Champions Иньчуань",
+    stage: "1/2 финала",
+    match: "Сунь Инша — Чэнь Мэн",
     market: "total_goals",
-    marketLabel: "Тотал очков больше 223.5",
-    loadPercent: 61,
+    marketLabel: "Тотал очков больше 74.5",
+    loadPercent: 64,
     oddsStart: 1.92,
-    oddsCurrent: 1.81,
-    loadValue: 214000,
+    oddsCurrent: 1.78,
+    loadValue: 128000,
     impact: "Высокий",
-    time: "05:30 MSK",
-    movement: [45, 52, 57, 61]
+    time: "14:10 MSK",
+    movement: [49, 55, 60, 64]
   },
   {
     id: 3,
-    sport: "Хоккей",
-    tournament: "NHL",
-    stage: "Регулярный сезон",
-    match: "Торонто Мэйпл Лифс — Бостон Брюинз",
+    sport: "Команды",
+    tournament: "ЧМ среди команд",
+    stage: "Финал",
+    match: "Китай — Германия",
     market: "handicap",
-    marketLabel: "Фора (-1.5) Торонто",
-    loadPercent: 58,
-    oddsStart: 2.15,
-    oddsCurrent: 1.94,
-    loadValue: 186000,
-    impact: "Средний",
-    time: "02:10 MSK",
-    movement: [41, 47, 53, 58]
+    marketLabel: "Фора (-1.5 матча) Китай",
+    loadPercent: 68,
+    oddsStart: 1.72,
+    oddsCurrent: 1.54,
+    loadValue: 204000,
+    impact: "Высокий",
+    time: "18:40 MSK",
+    movement: [52, 59, 63, 68]
   },
   {
     id: 4,
-    sport: "Теннис",
-    tournament: "ATP Masters Рим",
+    sport: "Смешанные пары",
+    tournament: "Чемпионат Европы",
     stage: "Полуфинал",
-    match: "Новак Джокович — Карлос Алькарас",
+    match: "Овтчаров/Солья — Лебессон/Юань",
     market: "total_goals",
-    marketLabel: "Тотал сетов больше 2.5",
-    loadPercent: 55,
-    oddsStart: 2.25,
-    oddsCurrent: 2.02,
-    loadValue: 98000,
+    marketLabel: "Тотал партий больше 4.5",
+    loadPercent: 58,
+    oddsStart: 2.05,
+    oddsCurrent: 1.94,
+    loadValue: 76000,
     impact: "Средний",
-    time: "17:30 MSK",
-    movement: [38, 44, 50, 55]
+    time: "20:20 MSK",
+    movement: [41, 47, 53, 58]
   },
   {
     id: 5,
-    sport: "Единоборства",
-    tournament: "UFC 300",
-    stage: "Главный бой",
-    match: "Ислам Махачев — Чарльз Оливейра",
+    sport: "Профессиональные лиги",
+    tournament: "T League Япония",
+    stage: "Регулярный сезон",
+    match: "Kinoshita Meister Tokyo — T.T Saitama",
     market: "match_winner",
-    marketLabel: "Победа Ислам Махачев",
-    loadPercent: 73,
-    oddsStart: 1.85,
-    oddsCurrent: 1.64,
-    loadValue: 248000,
-    impact: "Экстремальный",
-    time: "07:15 MSK",
-    movement: [55, 61, 67, 73]
+    marketLabel: "Победа Kinoshita Meister Tokyo",
+    loadPercent: 62,
+    oddsStart: 1.82,
+    oddsCurrent: 1.63,
+    loadValue: 94000,
+    impact: "Средний",
+    time: "12:05 MSK",
+    movement: [46, 52, 58, 62]
   },
   {
     id: 6,
-    sport: "Киберспорт",
-    tournament: "The International",
-    stage: "Гранд-финал",
-    match: "Team Spirit — Gaimin Gladiators",
-    market: "match_winner",
-    marketLabel: "Победа Team Spirit",
-    loadPercent: 67,
-    oddsStart: 2.10,
-    oddsCurrent: 1.88,
-    loadValue: 198000,
-    impact: "Высокий",
-    time: "14:00 MSK",
-    movement: [49, 55, 62, 67]
+    sport: "Профессиональные лиги",
+    tournament: "TTBL Германия",
+    stage: "Плей-офф",
+    match: "Боруссия Дюссельдорф — Саарбрюккен",
+    market: "total_goals",
+    marketLabel: "Тотал партий больше 7.5",
+    loadPercent: 55,
+    oddsStart: 2.18,
+    oddsCurrent: 2.02,
+    loadValue: 68000,
+    impact: "Средний",
+    time: "21:15 MSK",
+    movement: [38, 44, 51, 55]
   },
   {
     id: 7,
-    sport: "Футбол",
-    tournament: "Мир РПЛ",
-    stage: "Тур 26",
-    match: "Зенит — ЦСКА",
-    market: "both_score",
-    marketLabel: "Обе забьют — Да",
-    loadPercent: 63,
-    oddsStart: 1.95,
-    oddsCurrent: 1.82,
-    loadValue: 156000,
-    impact: "Средний",
-    time: "19:00 MSK",
-    movement: [44, 49, 56, 63]
+    sport: "Женщины · Одиночки",
+    tournament: "Чемпионат Европы",
+    stage: "1/4 финала",
+    match: "Адриана Диас — Бруна Такахаши",
+    market: "match_winner",
+    marketLabel: "Победа Адриана Диас",
+    loadPercent: 66,
+    oddsStart: 1.88,
+    oddsCurrent: 1.71,
+    loadValue: 112000,
+    impact: "Высокий",
+    time: "16:55 MSK",
+    movement: [48, 55, 61, 66]
   },
   {
     id: 8,
-    sport: "Баскетбол",
-    tournament: "Евролига",
-    stage: "Финал четырёх",
-    match: "Фенербахче — Олимпиакос",
+    sport: "Мужчины · Одиночки",
+    tournament: "Кубок Африки",
+    stage: "Финал",
+    match: "Квадри Аруна — Омар Ассар",
     market: "handicap",
-    marketLabel: "Фора (+4.5) Олимпиакос",
-    loadPercent: 57,
-    oddsStart: 1.98,
-    oddsCurrent: 1.86,
-    loadValue: 142000,
+    marketLabel: "Фора (-1.5) Квадри Аруна",
+    loadPercent: 59,
+    oddsStart: 2.01,
+    oddsCurrent: 1.84,
+    loadValue: 83000,
     impact: "Средний",
-    time: "21:45 MSK",
-    movement: [39, 45, 51, 57]
+    time: "19:35 MSK",
+    movement: [42, 48, 54, 59]
   }
 ];
 
 const stableTournaments = [
-  { name: "Лига чемпионов УЕФА", stability: "+7.8% ROI", matches: 48 },
-  { name: "NBA Плей-офф", stability: "+6.4% ROI", matches: 36 },
-  { name: "NHL регулярный сезон", stability: "+5.2% ROI", matches: 41 }
+  { name: "WTT Champions Series", stability: "+8.3% ROI", matches: 52 },
+  { name: "Чемпионат Европы", stability: "+6.1% ROI", matches: 34 },
+  { name: "TTBL Германия", stability: "+5.6% ROI", matches: 29 }
 ];
 
 const forecasts = [
-  { market: "Сити — победа", delta: "-0.11", confidence: 89 },
-  { market: "Лейкерс vs Уорриорз тотал 223.5", delta: "-0.07", confidence: 76 },
-  { market: "Махачев — победа", delta: "-0.08", confidence: 92 }
+  { market: "Фань Чжэндун — победа", delta: "-0.09", confidence: 90 },
+  { market: "Сунь Инша vs Чэнь Мэн тотал 74.5", delta: "-0.08", confidence: 78 },
+  { market: "Квадри Аруна (-1.5)", delta: "-0.07", confidence: 84 }
 ];
 
 const parlayIdeas = [
   {
     id: "combo-1",
-    title: "Вечерний фаворит",
+    title: "Импульс мирового тура",
     risk: "Сбалансированный",
-    confidence: 82,
-    totalOdds: 3.84,
-    edge: "+7% EV",
+    confidence: 83,
+    totalOdds: 3.12,
+    edge: "+8% EV",
     legs: [
       { match: marketsData[0].match, pick: marketsData[0].marketLabel, sport: marketsData[0].sport },
-      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport }
+      { match: marketsData[1].match, pick: marketsData[1].marketLabel, sport: marketsData[1].sport }
     ],
-    comment: "Сочетание топовых линий из футбола и тенниса для вечернего прайм-тайма."
+    comment: "Комбинация фаворита мужского разряда и агрессивного тотала у женщин."
   },
   {
     id: "combo-2",
-    title: "Ночная очередь",
+    title: "Азиатская ночь",
     risk: "Агрессивный",
-    confidence: 76,
-    totalOdds: 4.62,
-    edge: "+11% EV",
+    confidence: 74,
+    totalOdds: 4.48,
+    edge: "+10% EV",
     legs: [
-      { match: marketsData[1].match, pick: marketsData[1].marketLabel, sport: marketsData[1].sport },
-      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport },
-      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport }
+      { match: marketsData[4].match, pick: marketsData[4].marketLabel, sport: marketsData[4].sport },
+      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport },
+      { match: marketsData[3].match, pick: marketsData[3].marketLabel, sport: marketsData[3].sport }
     ],
-    comment: "Риски выше нормы, зато покрываем NBA, NHL и киберспорт в одной связке."
+    comment: "Пари на японскую T League, финал Африки и европейский микст с высокой волатильностью."
   },
   {
     id: "combo-3",
-    title: "Выходной экспресс",
+    title: "Лиговый контроль",
     risk: "Консервативный",
-    confidence: 88,
-    totalOdds: 2.91,
+    confidence: 87,
+    totalOdds: 2.74,
     edge: "+5% EV",
     legs: [
-      { match: marketsData[6].match, pick: marketsData[6].marketLabel, sport: marketsData[6].sport },
-      { match: marketsData[7].match, pick: marketsData[7].marketLabel, sport: marketsData[7].sport }
+      { match: marketsData[2].match, pick: marketsData[2].marketLabel, sport: marketsData[2].sport },
+      { match: marketsData[5].match, pick: marketsData[5].marketLabel, sport: marketsData[5].sport }
     ],
-    comment: "Подборка с упором на стабильные чемпионаты и умеренную волатильность."
+    comment: "Упор на командные матчи с устойчивой динамикой прогруза и контролем риска."
   }
 ];
 
@@ -210,16 +210,16 @@ let liveFeedEvents = [
   createFeedEvent({
     minutesAgo: 12,
     type: "live",
-    context: `${marketsData[5].tournament} · ${marketsData[5].sport}`,
-    title: marketsData[5].match,
-    description: `Team Spirit получает поддержку сообщества: ${marketsData[5].loadPercent}% ставок и объём ${formatCurrency(marketsData[5].loadValue)}.`
+    context: `${marketsData[4].tournament} · ${marketsData[4].sport}`,
+    title: marketsData[4].match,
+    description: `${marketsData[4].marketLabel} собирает ${marketsData[4].loadPercent}% ставок — объём дошёл до ${formatCurrency(marketsData[4].loadValue)}.`
   }),
   createFeedEvent({
     minutesAgo: 16,
     type: "trend",
-    context: `${marketsData[6].tournament} · ${marketsData[6].sport}`,
-    title: marketsData[6].match,
-    description: `Игроки ждут обмен голами: ${marketsData[6].marketLabel} держится на ${marketsData[6].loadPercent}% прогруза.`
+    context: `${marketsData[5].tournament} · ${marketsData[5].sport}`,
+    title: marketsData[5].match,
+    description: `Линия на ${marketsData[5].marketLabel.toLowerCase()} стабильно растёт: ${marketsData[5].loadPercent}% прогруза при объёме ${formatCurrency(marketsData[5].loadValue)}.`
   })
 ];
 
