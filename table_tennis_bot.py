@@ -1,9 +1,9 @@
-"""Telegram bot for managing a table tennis cup bracket.
+"""Telegram bot that tracks table tennis betting markets.
 
-The bot is built on top of the python-telegram-bot v20 API and keeps all
-state inside a JSON file.  The design focuses on running a single cup at a
-time and guiding the organiser through registration, bracket creation and
-score reporting.
+The bot is built on the python-telegram-bot v20 API and persists its state in
+``data/cup_state.json``.  It allows an organiser to publish upcoming table
+tennis matches, configure decimal odds, accept bets from participants and then
+settle those bets once the results are known.
 
 Usage
 -----
@@ -21,17 +21,14 @@ Usage
 
 Command summary
 ---------------
-* /start – greeting and current cup status.
+* /start – greeting and short help.
 * /help – detailed instructions.
-* /newcup <name> – reset state and start a new cup registration.
-* /addplayer <name> – register a participant.
-* /listplayers – list the current player pool.
-* /startcup – lock registration and generate the opening bracket.
-* /bracket – show the current round matches and results.
-* /result <match_id> <winner> <score> – report a finished match.
-
-All state is persisted in ``data/cup_state.json`` so the bot can be stopped
-and resumed without data loss.
+* /addmatch <игрок1> vs <игрок2> – создать новую линию ставок.
+* /setodds <id> <коэф1> <коэф2> – задать коэффициенты для матча.
+* /listmatches – показать все матчи и их статус.
+* /bet <id> <игрок> <сумма> – сделать ставку на конкретного игрока.
+* /mybets – показать ставки текущего пользователя.
+* /result <id> <победитель> – завершить матч и рассчитать выплаты.
 """
 
 from __future__ import annotations
@@ -39,7 +36,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -61,14 +60,9 @@ def load_state() -> Dict:
         with STATE_FILE.open("r", encoding="utf-8") as fh:
             return json.load(fh)
     return {
-        "cup": {
-            "name": None,
-            "status": "idle",
-            "players": [],
-            "rounds": [],
-            "current_round": 0,
-            "next_match_id": 1,
-        }
+        "matches": [],
+        "bets": [],
+        "next_match_id": 1,
     }
 
 
@@ -78,318 +72,374 @@ def save_state(state: Dict) -> None:
         json.dump(state, fh, ensure_ascii=False, indent=2)
 
 
-def pairwise(items: List[Optional[str]]) -> List[List[Optional[str]]]:
-    return [items[i : i + 2] for i in range(0, len(items), 2)]
-
-
-def expand_to_power_of_two(players: List[str]) -> List[Optional[str]]:
-    """Expand the player list with None placeholders until it reaches 2**n."""
-
-    filled = list(players)
-    target = 1
-    while target < max(2, len(players)):
-        target *= 2
-    while len(filled) < target:
-        filled.append(None)
-    return filled
-
-
 @dataclass
 class Match:
     match_id: int
-    round_no: int
-    player1: Optional[str]
-    player2: Optional[str]
+    player1: str
+    player2: str
+    odds_player1: float = 1.9
+    odds_player2: float = 1.9
+    status: str = "open"
     winner: Optional[str] = None
-    score: Optional[str] = None
 
     def to_dict(self) -> Dict:
         return {
             "id": self.match_id,
-            "round": self.round_no,
             "player1": self.player1,
             "player2": self.player2,
+            "odds": {
+                "player1": self.odds_player1,
+                "player2": self.odds_player2,
+            },
+            "status": self.status,
             "winner": self.winner,
-            "score": self.score,
         }
 
 
 @dataclass
-class CupManager:
+class Bet:
+    match_id: int
+    user_id: int
+    username: str
+    selection: str
+    amount: float
+    odds: float
+    status: str = "pending"
+    payout: Optional[float] = None
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+    def to_dict(self) -> Dict:
+        return {
+            "match_id": self.match_id,
+            "user_id": self.user_id,
+            "username": self.username,
+            "selection": self.selection,
+            "amount": self.amount,
+            "odds": self.odds,
+            "status": self.status,
+            "payout": self.payout,
+            "created_at": self.created_at,
+        }
+
+
+@dataclass
+class BettingManager:
     state: Dict = field(default_factory=load_state)
 
-    # --- convenience properties -------------------------------------------------
     @property
-    def cup(self) -> Dict:
-        return self.state["cup"]
+    def matches(self) -> List[Dict]:
+        return self.state.setdefault("matches", [])
 
     @property
-    def status(self) -> str:
-        return self.cup.get("status", "idle")
+    def bets(self) -> List[Dict]:
+        return self.state.setdefault("bets", [])
 
-    @property
-    def players(self) -> List[str]:
-        return self.cup.setdefault("players", [])
-
-    @property
-    def rounds(self) -> List[List[Dict]]:
-        return self.cup.setdefault("rounds", [])
-
-    @property
-    def current_round(self) -> int:
-        return self.cup.get("current_round", 0)
-
-    # --- state persistence ------------------------------------------------------
+    # --- persistence -----------------------------------------------------------
     def save(self) -> None:
         save_state(self.state)
 
-    # --- business logic --------------------------------------------------------
-    def new_cup(self, name: str) -> None:
-        self.state["cup"] = {
-            "name": name,
-            "status": "registration",
-            "players": [],
-            "rounds": [],
-            "current_round": 0,
-            "next_match_id": 1,
-        }
+    # --- match management ------------------------------------------------------
+    def add_match(self, player1: str, player2: str) -> str:
+        player1 = player1.strip()
+        player2 = player2.strip()
+        if not player1 or not player2:
+            return "Имена игроков не должны быть пустыми."
+
+        match = Match(match_id=self._next_match_id(), player1=player1, player2=player2)
+        self.matches.append(match.to_dict())
         self.save()
+        return (
+            f"Добавлен матч #{match.match_id}: {player1} vs {player2}."
+            " Коэффициенты по умолчанию 1.90 / 1.90."
+        )
 
-    def add_player(self, player: str) -> str:
-        if self.status not in {"registration"}:
-            return "Сейчас нельзя добавлять игроков: регистрация закрыта."
-        player = player.strip()
-        if not player:
-            return "Имя игрока не должно быть пустым."
-        if player in self.players:
-            return "Такой игрок уже зарегистрирован."
-        self.players.append(player)
-        self.save()
-        return f"Игрок {player} добавлен."
+    def list_matches(self) -> str:
+        if not self.matches:
+            return "Пока нет активных матчей."
 
-    def list_players(self) -> str:
-        if not self.players:
-            return "Пока нет зарегистрированных игроков."
-        header = f"Всего игроков: {len(self.players)}"
-        body = "\n".join(f"• {name}" for name in self.players)
-        return f"{header}\n{body}"
-
-    def start_cup(self) -> str:
-        if self.status != "registration":
-            return "Нельзя начать турнир: либо он уже идёт, либо не создан."
-        if len(self.players) < 2:
-            return "Чтобы начать турнир, добавьте минимум двух игроков."
-
-        expanded = expand_to_power_of_two(self.players)
-        pairs = pairwise(expanded)
-        round_matches = []
-        for player1, player2 in pairs:
-            match = Match(
-                match_id=self._next_match_id(),
-                round_no=1,
-                player1=player1,
-                player2=player2,
+        lines = []
+        for match in self.matches:
+            odds = match.get("odds", {})
+            lines.append(
+                "#%(id)s %(player1)s vs %(player2)s — статус: %(status)s, "
+                "коэффициенты: %(p1).2f / %(p2).2f" % {
+                    "id": match.get("id"),
+                    "player1": match.get("player1"),
+                    "player2": match.get("player2"),
+                    "status": match.get("status", "unknown"),
+                    "p1": odds.get("player1", 0.0),
+                    "p2": odds.get("player2", 0.0),
+                }
             )
-            if player1 is None and player2 is None:
-                match.score = "BYE"
-            elif player2 is None:
-                match.winner = player1
-                match.score = "BYE"
-            round_matches.append(match.to_dict())
-
-        self.rounds.append(round_matches)
-        self.cup["status"] = "in_progress"
-        self.cup["current_round"] = 1
-        self.save()
-
-        auto_advances = [m for m in round_matches if m["winner"]]
-        message = "Турнир начат! Сетка первого раунда сформирована."
-        if auto_advances:
-            names = ", ".join(m["winner"] for m in auto_advances if m["winner"])
-            message += f"\nСледующие игроки прошли дальше автоматически: {names}."
-        return message
-
-    def bracket_summary(self) -> str:
-        if self.status == "idle" or not self.rounds:
-            return "Сетка пока не создана."
-
-        lines = [f"Текущий статус: {self.status}"]
-        for round_idx, matches in enumerate(self.rounds, start=1):
-            lines.append(f"\nРаунд {round_idx}:")
-            for match in matches:
-                p1 = match.get("player1") or "BYE"
-                p2 = match.get("player2") or "BYE"
-                winner = match.get("winner")
-                score = match.get("score")
-                if winner:
-                    lines.append(
-                        f"#{match['id']} {p1} vs {p2} — победил {winner} ({score})"
-                    )
-                else:
-                    lines.append(f"#{match['id']} {p1} vs {p2} — в ожидании")
+            if match.get("winner"):
+                lines.append(f"    Победитель: {match['winner']}")
         return "\n".join(lines)
 
-    def report_result(self, match_id: int, winner: str, score: str) -> str:
+    def set_odds(self, match_id: int, odds1: float, odds2: float) -> str:
         match = self._find_match(match_id)
         if not match:
             return "Матч с таким номером не найден."
-        if match.get("winner"):
-            return "Результат этого матча уже зафиксирован."
+        if match.get("status") == "finished":
+            return "Для завершённого матча нельзя менять коэффициенты."
+        if odds1 <= 1.0 or odds2 <= 1.0:
+            return "Коэффициенты должны быть больше 1.0."
 
-        players = {match.get("player1"), match.get("player2")}
-        players.discard(None)
-        if winner not in players:
-            return "Победитель должен быть одним из участников матча."
+        match.setdefault("odds", {})["player1"] = round(odds1, 2)
+        match.setdefault("odds", {})["player2"] = round(odds2, 2)
+        self.save()
+        return (
+            f"Коэффициенты для матча #{match_id} обновлены: "
+            f"{match['player1']} {odds1:.2f}, {match['player2']} {odds2:.2f}."
+        )
 
-        match["winner"] = winner
-        match["score"] = score
+    # --- betting ---------------------------------------------------------------
+    def place_bet(self, *,
+                  match_id: int,
+                  selection: str,
+                  amount: float,
+                  user_id: int,
+                  username: str) -> str:
+        match = self._find_match(match_id)
+        if not match:
+            return "Матч с таким номером не найден."
+        if match.get("status") != "open":
+            return "На этот матч нельзя сделать ставку."
+        if amount <= 0:
+            return "Сумма ставки должна быть положительной."
+
+        normalized_selection = selection.strip().lower()
+        players = {
+            match["player1"].lower(): match["player1"],
+            match["player2"].lower(): match["player2"],
+        }
+        if normalized_selection not in players:
+            return "Ставку можно сделать только на одного из игроков матча."
+
+        player_key = (
+            "player1" if players[normalized_selection] == match["player1"] else "player2"
+        )
+        odds = match.setdefault("odds", {}).get(player_key)
+        if odds is None:
+            return "Для выбранного игрока ещё не заданы коэффициенты."
+
+        bet = Bet(
+            match_id=match_id,
+            user_id=user_id,
+            username=username,
+            selection=players[normalized_selection],
+            amount=round(amount, 2),
+            odds=float(odds),
+        )
+        self.bets.append(bet.to_dict())
+        self.save()
+        return (
+            f"Ставка принята: {bet.selection} с коэффициентом {bet.odds:.2f}."
+            f" Потенциальная выплата: {bet.amount * bet.odds:.2f}."
+        )
+
+    def list_user_bets(self, user_id: int) -> str:
+        user_bets = [bet for bet in self.bets if bet.get("user_id") == user_id]
+        if not user_bets:
+            return "У вас пока нет ставок."
+
+        lines = []
+        for bet in user_bets:
+            status = bet.get("status", "pending")
+            payout = bet.get("payout")
+            lines.append(
+                "Матч #%(match_id)s — %(selection)s, сумма %(amount).2f, "
+                "коэф %(odds).2f, статус %(status)s" % {
+                    "match_id": bet.get("match_id"),
+                    "selection": bet.get("selection"),
+                    "amount": bet.get("amount", 0.0),
+                    "odds": bet.get("odds", 0.0),
+                    "status": status,
+                }
+            )
+            if payout is not None:
+                lines.append(f"    Выплата: {payout:.2f}")
+        return "\n".join(lines)
+
+    def record_result(self, match_id: int, winner: str) -> str:
+        match = self._find_match(match_id)
+        if not match:
+            return "Матч с таким номером не найден."
+        if match.get("status") == "finished":
+            return "Результат матча уже зафиксирован."
+
+        normalized_winner = winner.strip().lower()
+        if normalized_winner not in {
+            match["player1"].lower(),
+            match["player2"].lower(),
+        }:
+            return "Победитель должен быть одним из игроков матча."
+
+        canonical_winner = (
+            match["player1"] if normalized_winner == match["player1"].lower() else match["player2"]
+        )
+        match["winner"] = canonical_winner
+        match["status"] = "finished"
+
+        settled = []
+        for bet in self.bets:
+            if bet.get("match_id") != match_id:
+                continue
+            if bet.get("selection") == canonical_winner:
+                payout = round(bet.get("amount", 0.0) * bet.get("odds", 0.0), 2)
+                bet["status"] = "won"
+                bet["payout"] = payout
+                settled.append(f"Победитель {bet['username']}: выплата {payout:.2f}")
+            else:
+                bet["status"] = "lost"
+                bet["payout"] = 0.0
+                settled.append(f"Ставка {bet['username']} проиграла.")
+
         self.save()
 
-        self._update_next_round(match)
-        return "Результат принят."
+        summary = [
+            f"Матч #{match_id} завершён. Победитель: {canonical_winner}.",
+        ]
+        if settled:
+            summary.extend(settled)
+        else:
+            summary.append("На этот матч не было ставок.")
+        return "\n".join(summary)
 
     # --- helpers ----------------------------------------------------------------
     def _next_match_id(self) -> int:
-        next_id = self.cup.get("next_match_id", 1)
-        self.cup["next_match_id"] = next_id + 1
+        next_id = self.state.get("next_match_id", 1)
+        self.state["next_match_id"] = next_id + 1
         return next_id
 
     def _find_match(self, match_id: int) -> Optional[Dict]:
-        for matches in self.rounds:
-            for match in matches:
-                if match.get("id") == match_id:
-                    return match
+        for match in self.matches:
+            if match.get("id") == match_id:
+                return match
         return None
 
-    def _update_next_round(self, completed_match: Dict) -> None:
-        round_no = completed_match["round"]
-        matches = self.rounds[round_no - 1]
-        all_finished = all(self._is_match_finished(m) for m in matches)
-        if not all_finished:
-            self.save()
-            return
 
-        winners = [
-            None if self._is_double_bye(m) else m.get("winner")
-            for m in matches
-        ]
-        if len(winners) == 1:
-            self.cup["status"] = "finished"
-            self.save()
-            return
-
-        next_round_index = round_no
-        if len(self.rounds) <= next_round_index:
-            self.rounds.append([])
-
-        next_round_matches = self.rounds[next_round_index]
-        if next_round_matches:
-            # round already prepared, just fill placeholders
-            self.save()
-            return
-
-        for player1, player2 in pairwise(winners):
-            match = Match(
-                match_id=self._next_match_id(),
-                round_no=round_no + 1,
-                player1=player1,
-                player2=player2,
-            )
-            if player1 is None and player2 is None:
-                match.score = "BYE"
-            elif player2 is None:
-                match.winner = player1
-                match.score = "BYE"
-            next_round_matches.append(match.to_dict())
-
-        self.cup["current_round"] = round_no + 1
-        self.save()
-
-    def _is_double_bye(self, match: Dict) -> bool:
-        return match.get("player1") is None and match.get("player2") is None
-
-    def _is_match_finished(self, match: Dict) -> bool:
-        return bool(match.get("winner")) or self._is_double_bye(match)
-
-
-manager = CupManager()
+manager = BettingManager()
 
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    cup_name = manager.cup.get("name")
     greeting = [
-        "Привет! Я бот для ведения сетки настольного тенниса.",
+        "Привет! Я бот для ставок на матчи по настольному теннису.",
         "Используйте /help, чтобы узнать доступные команды.",
     ]
-    if cup_name:
-        greeting.append(f"Активный турнир: {cup_name} (статус: {manager.status}).")
     await update.message.reply_text("\n".join(greeting))
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = (
         "Доступные команды:\n"
-        "/newcup <название> — создать новую сетку и открыть регистрацию.\n"
-        "/addplayer <имя> — добавить участника.\n"
-        "/listplayers — показать зарегистрированных игроков.\n"
-        "/startcup — завершить регистрацию и сгенерировать сетку.\n"
-        "/bracket — показать текущую сетку и результаты.\n"
-        "/result <id> <победитель> <счёт> — зафиксировать матч.\n"
-        "Пример: /result 3 Иванов 3:1"
+        "/addmatch <игрок1> vs <игрок2> — создать матч для ставок.\n"
+        "/setodds <id> <коэф1> <коэф2> — обновить коэффициенты.\n"
+        "/listmatches — показать список матчей и их статус.\n"
+        "/bet <id> <игрок> <сумма> — сделать ставку.\n"
+        "/mybets — посмотреть свои ставки.\n"
+        "/result <id> <победитель> — завершить матч и рассчитать выплаты."
     )
     await update.message.reply_text(text)
 
 
-async def cmd_newcup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def cmd_addmatch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not context.args:
-        await update.message.reply_text("Укажите название турнира после команды.")
-        return
-    name = " ".join(context.args)
-    manager.new_cup(name)
-    await update.message.reply_text(
-        f"Создан турнир '{name}'. Добавляйте игроков командой /addplayer."
-    )
-
-
-async def cmd_addplayer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not context.args:
-        await update.message.reply_text("Укажите имя игрока после команды.")
-        return
-    name = " ".join(context.args)
-    message = manager.add_player(name)
-    await update.message.reply_text(message)
-
-
-async def cmd_listplayers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(manager.list_players())
-
-
-async def cmd_startcup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = manager.start_cup()
-    await update.message.reply_text(message)
-
-
-async def cmd_bracket(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    summary = manager.bracket_summary()
-    await update.message.reply_text(summary)
-
-
-async def cmd_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if len(context.args) < 3:
         await update.message.reply_text(
-            "Использование: /result <id> <победитель> <счёт>."
+            "Использование: /addmatch Игрок1 vs Игрок2"
         )
         return
 
-    match_id_str, winner, *score_parts = context.args
+    joined = " ".join(context.args)
+    parts = re.split(r"\s+vs\s+", joined, flags=re.IGNORECASE)
+    if len(parts) != 2:
+        await update.message.reply_text(
+            "Не удалось распознать игроков. Используйте формат 'Игрок1 vs Игрок2'."
+        )
+        return
+
+    player1, player2 = parts
+    message = manager.add_match(player1, player2)
+    await update.message.reply_text(message)
+
+
+async def cmd_setodds(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if len(context.args) != 3:
+        await update.message.reply_text(
+            "Использование: /setodds <id> <коэф игрока1> <коэф игрока2>"
+        )
+        return
+
+    match_id_str, odds1_str, odds2_str = context.args
+    try:
+        match_id = int(match_id_str)
+        odds1 = float(odds1_str.replace(",", "."))
+        odds2 = float(odds2_str.replace(",", "."))
+    except ValueError:
+        await update.message.reply_text("Не удалось распознать числа. Проверьте ввод.")
+        return
+
+    message = manager.set_odds(match_id, odds1, odds2)
+    await update.message.reply_text(message)
+
+
+async def cmd_listmatches(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(manager.list_matches())
+
+
+async def cmd_bet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if len(context.args) < 3:
+        await update.message.reply_text(
+            "Использование: /bet <id> <игрок> <сумма>"
+        )
+        return
+
+    match_id_str, selection, *amount_parts = context.args
     try:
         match_id = int(match_id_str)
     except ValueError:
         await update.message.reply_text("Номер матча должен быть числом.")
         return
 
-    score = " ".join(score_parts)
-    message = manager.report_result(match_id, winner, score)
+    amount_str = " ".join(amount_parts).replace(",", ".")
+    try:
+        amount = float(amount_str)
+    except ValueError:
+        await update.message.reply_text("Сумма ставки должна быть числом.")
+        return
+
+    user = update.effective_user
+    username = user.username or user.full_name or "unknown"
+    message = manager.place_bet(
+        match_id=match_id,
+        selection=selection,
+        amount=amount,
+        user_id=user.id,
+        username=username,
+    )
+    await update.message.reply_text(message)
+
+
+async def cmd_mybets(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    await update.message.reply_text(manager.list_user_bets(user_id))
+
+
+async def cmd_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if len(context.args) < 2:
+        await update.message.reply_text(
+            "Использование: /result <id> <победитель>"
+        )
+        return
+
+    match_id_str, *winner_parts = context.args
+    try:
+        match_id = int(match_id_str)
+    except ValueError:
+        await update.message.reply_text("Номер матча должен быть числом.")
+        return
+
+    winner = " ".join(winner_parts)
+    message = manager.record_result(match_id, winner)
     await update.message.reply_text(message)
 
 
@@ -411,11 +461,11 @@ def main() -> None:
 
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("help", cmd_help))
-    application.add_handler(CommandHandler("newcup", cmd_newcup))
-    application.add_handler(CommandHandler("addplayer", cmd_addplayer))
-    application.add_handler(CommandHandler("listplayers", cmd_listplayers))
-    application.add_handler(CommandHandler("startcup", cmd_startcup))
-    application.add_handler(CommandHandler("bracket", cmd_bracket))
+    application.add_handler(CommandHandler("addmatch", cmd_addmatch))
+    application.add_handler(CommandHandler("setodds", cmd_setodds))
+    application.add_handler(CommandHandler("listmatches", cmd_listmatches))
+    application.add_handler(CommandHandler("bet", cmd_bet))
+    application.add_handler(CommandHandler("mybets", cmd_mybets))
     application.add_handler(CommandHandler("result", cmd_result))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, fallback))
 
