@@ -624,6 +624,79 @@ main {
   font-size: 0.92rem;
 }
 
+.market-card__intel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(151, 162, 196, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.confidence-meter {
+  flex: 1 1 220px;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.confidence-meter__track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(151, 162, 196, 0.2);
+  overflow: hidden;
+}
+
+.confidence-meter__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(51, 240, 148, 0.9) 0%, rgba(51, 240, 148, 0.4) 100%);
+  transition: width 0.5s ease;
+}
+
+[data-theme="light"] .confidence-meter__fill {
+  background: linear-gradient(135deg, rgba(44, 123, 229, 0.9) 0%, rgba(44, 123, 229, 0.4) 100%);
+}
+
+.confidence-meter__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.confidence-meter__label strong {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.probability-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+  color: var(--text);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+[data-theme="light"] .market-card__intel {
+  background: rgba(17, 21, 36, 0.04);
+  border-color: rgba(17, 21, 36, 0.08);
+}
+
+[data-theme="light"] .probability-chip {
+  background: rgba(17, 21, 36, 0.04);
+}
+
 .market-card__actions {
   display: flex;
   justify-content: space-between;

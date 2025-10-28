@@ -289,6 +289,8 @@ function renderMarkets() {
     .filter(item => (marketFilter === "all" || item.market === marketFilter));
 
   filteredMarkets.forEach(item => {
+    const confidence = evaluateMarketConfidence(item);
+    const impliedProbability = calculateImpliedProbability(item.oddsCurrent);
     const card = document.createElement("article");
     card.className = "market-card";
     card.role = "listitem";
@@ -314,6 +316,20 @@ function renderMarkets() {
       </div>
       <div class="market-card__meta">
         Коэффициенты: было ${item.oddsStart.toFixed(2)} → сейчас ${item.oddsCurrent.toFixed(2)}
+      </div>
+      <div class="market-card__intel">
+        <div class="confidence-meter" role="img" aria-label="Уверенность модели ${confidence}%">
+          <div class="confidence-meter__track">
+            <span class="confidence-meter__fill" style="width:${confidence}%"></span>
+          </div>
+          <div class="confidence-meter__label">
+            <span>Уверенность модели</span>
+            <strong>${confidence}%</strong>
+          </div>
+        </div>
+        <div class="probability-chip" aria-label="Имплицитная вероятность ${impliedProbability}%">
+          Имп. вероятность <strong>${impliedProbability}%</strong>
+        </div>
       </div>
       <div class="market-card__actions" role="group" aria-label="Действия со ставкой">
         <span class="market-card__odds">Текущий коэфф. ${item.oddsCurrent.toFixed(2)}</span>
@@ -865,6 +881,31 @@ function clampOdds(value) {
   return Math.max(1.35, Math.min(2.65, value));
 }
 
+function calculateImpliedProbability(odds) {
+  if (!Number.isFinite(odds) || odds <= 1) {
+    return 50;
+  }
+  const implied = Math.round((1 / odds) * 100);
+  return Math.max(35, Math.min(92, implied));
+}
+
+function evaluateMarketConfidence(market) {
+  const implied = calculateImpliedProbability(market.oddsCurrent);
+  const movement = Array.isArray(market.movement) && market.movement.length ? market.movement : [market.loadPercent];
+  const momentum = movement[movement.length - 1] - movement[0];
+  const impactBoost =
+    market.impact === "Экстремальный"
+      ? 6
+      : market.impact === "Высокий"
+      ? 4
+      : market.impact === "Средний"
+      ? 2
+      : 0;
+  const baseline = (implied + market.loadPercent) / 2;
+  const adjusted = baseline + momentum * 0.35 + impactBoost;
+  return Math.max(48, Math.min(95, Math.round(adjusted)));
+}
+
 function createFeedEvent({ minutesAgo, type, context, title, description }) {
   return {
     id: `seed-${Math.random().toString(36).slice(2, 8)}`,
@@ -889,16 +930,15 @@ function renderHeroStats() {
     marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
   );
   const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
+  const averageConfidence = Math.round(
+    marketsData.reduce((sum, item) => sum + evaluateMarketConfidence(item), 0) / totalMarkets
+  );
 
   const stats = [
     { label: "Прогнозов в ленте", value: totalMarkets },
     { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
+    { label: "Средняя уверенность", value: `${averageConfidence}%` },
+    { label: "Сигналы высокой значимости", value: `${highImpactCount}` }
   ];
 
   container.innerHTML = stats
@@ -963,6 +1003,9 @@ function renderInsights() {
   const averageLoad = Math.round(
     marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / marketsData.length
   );
+  const averageConfidence = Math.round(
+    marketsData.reduce((sum, item) => sum + evaluateMarketConfidence(item), 0) / marketsData.length
+  );
 
   const cards = [
     {
@@ -999,7 +1042,7 @@ function renderInsights() {
     .join("");
 
   if (meta) {
-    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · ${new Date().toLocaleTimeString("ru-RU", {
+    meta.textContent = `Отслеживаем ${marketsData.length} событий · средний прогруз ${averageLoad}% · средняя уверенность ${averageConfidence}% · ${new Date().toLocaleTimeString("ru-RU", {
       hour: "2-digit",
       minute: "2-digit"
     })}`;
