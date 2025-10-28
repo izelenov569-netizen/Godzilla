@@ -184,6 +184,54 @@ const parlayIdeas = [
   }
 ];
 
+const headlineMatches = [
+  {
+    id: "scoreboard-1",
+    sport: "Футбол",
+    league: "АПЛ · Тур 34",
+    match: "Арсенал — Манчестер Сити",
+    kickoff: "21:30 MSK",
+    handle: 542000,
+    confidence: 86,
+    pulse: "🔥 Горячий тренд",
+    markets: [
+      { name: "Победа Арсенал", odds: 2.32, delta: 0.08 },
+      { name: "Тотал голов больше 2.5", odds: 1.95, delta: -0.05 },
+      { name: "Обе забьют — да", odds: 1.71, delta: 0.03 }
+    ]
+  },
+  {
+    id: "scoreboard-2",
+    sport: "Хоккей",
+    league: "NHL · Финал конференции",
+    match: "Торонто Мэйпл Лифс — Флорида Пантерз",
+    kickoff: "02:10 MSK",
+    handle: 418000,
+    confidence: 78,
+    pulse: "⚡ Всплеск активности",
+    markets: [
+      { name: "Победа Торонто", odds: 1.86, delta: -0.07 },
+      { name: "Фора (-1.5) Торонто", odds: 2.32, delta: 0.11 },
+      { name: "Тотал меньше 6.0", odds: 1.93, delta: 0.02 }
+    ]
+  },
+  {
+    id: "scoreboard-3",
+    sport: "UFC",
+    league: "UFC 300 · Главный кард",
+    match: "Ислам Махачев — Чарльз Оливейра",
+    kickoff: "07:15 MSK",
+    handle: 365000,
+    confidence: 92,
+    pulse: "🧠 Премиум прогноз",
+    markets: [
+      { name: "Победа Махачев", odds: 1.64, delta: -0.06 },
+      { name: "Победа решением", odds: 2.45, delta: 0.09 },
+      { name: "Тотал раундов больше 3.5", odds: 1.87, delta: 0.04 }
+    ]
+  }
+];
+
 const betSlipState = {
   selections: [],
   stake: 1000,
@@ -241,6 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMarkets();
   renderAnalytics();
   renderInsights();
+  renderScoreboard();
   renderCombos();
   renderLiveFeed();
   renderBetSlip();
@@ -889,16 +938,13 @@ function renderHeroStats() {
     marketsData.reduce((sum, item) => sum + item.loadPercent, 0) / totalMarkets
   );
   const highImpactCount = marketsData.filter(item => item.impact === "Высокий" || item.impact === "Экстремальный").length;
-  const nightEvents = marketsData.filter(item => {
-    const hours = Number(item.time.split(":")[0]);
-    return hours >= 0 && hours < 6;
-  }).length;
+  const featuredCount = headlineMatches.length;
 
   const stats = [
-    { label: "Прогнозов в ленте", value: totalMarkets },
+    { label: "Прогнозов в линии", value: totalMarkets },
     { label: "Средний прогруз", value: `${averageLoad}%` },
-    { label: "Высокая уверенность", value: `${highImpactCount}` },
-    { label: "Ночные события", value: `${nightEvents}` }
+    { label: "Экстремальные сигналы", value: `${highImpactCount}` },
+    { label: "Матчи в центре", value: `${featuredCount}` }
   ];
 
   container.innerHTML = stats
@@ -1006,6 +1052,51 @@ function renderInsights() {
   }
 }
 
+function renderScoreboard() {
+  const grid = document.getElementById("scoreboard-grid");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  if (!headlineMatches.length) {
+    grid.innerHTML = `<div class="empty-state">Матчи появятся после обновления данных.</div>`;
+    return;
+  }
+
+  headlineMatches.forEach(match => {
+    const card = document.createElement("article");
+    card.className = "scoreboard-card";
+    card.setAttribute("role", "listitem");
+    card.innerHTML = `
+      <header class="scoreboard-card__top">
+        <span class="scoreboard-card__sport">${match.sport}</span>
+        <span class="scoreboard-card__time">${match.kickoff}</span>
+      </header>
+      <h3>${match.match}</h3>
+      <div class="scoreboard-card__league">${match.league}</div>
+      <div class="scoreboard-card__confidence ${getConfidenceClass(match.confidence)}">Уверенность ${match.confidence}%</div>
+      <ul class="scoreboard-card__markets">
+        ${match.markets
+          .map(
+            market => `
+              <li class="scoreboard-card__market">
+                <span class="scoreboard-card__market-name">${market.name}</span>
+                <span class="scoreboard-card__market-odds">${market.odds.toFixed(2)}</span>
+                <span class="scoreboard-card__delta ${getDeltaClass(market.delta)}">${formatDelta(market.delta)}</span>
+              </li>
+            `
+          )
+          .join("")}
+      </ul>
+      <footer class="scoreboard-card__footer">
+        <span class="scoreboard-card__handle">Пул ставок: ${formatCurrency(match.handle)}</span>
+        <span class="scoreboard-card__pulse">${match.pulse}</span>
+      </footer>
+    `;
+    grid.append(card);
+  });
+}
+
 function renderCombos() {
   const grid = document.getElementById("combo-grid");
   if (!grid) return;
@@ -1107,4 +1198,35 @@ function copyTextFallback(text) {
     console.error("Не удалось скопировать экспресс", error);
   }
   textarea.remove();
+}
+
+function getConfidenceClass(confidence) {
+  if (confidence >= 90) {
+    return "scoreboard-card__confidence--elite";
+  }
+  if (confidence >= 80) {
+    return "scoreboard-card__confidence--high";
+  }
+  if (confidence >= 65) {
+    return "scoreboard-card__confidence--solid";
+  }
+  return "scoreboard-card__confidence--watch";
+}
+
+function getDeltaClass(delta) {
+  if (delta > 0) {
+    return "scoreboard-card__delta--up";
+  }
+  if (delta < 0) {
+    return "scoreboard-card__delta--down";
+  }
+  return "";
+}
+
+function formatDelta(delta) {
+  if (!Number.isFinite(delta) || delta === 0) {
+    return "—";
+  }
+  const value = Math.abs(delta).toFixed(2);
+  return delta > 0 ? `↑${value}` : `↓${value}`;
 }
